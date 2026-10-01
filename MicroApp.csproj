@@ -148,6 +148,7 @@
     <Compile Include="ShortcutSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="SystemShortcutsForm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TextPicker.cs" />
     <Compile Include="NoteForm.cs" />
