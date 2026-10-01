@@ -45,17 +45,30 @@ namespace MicroApp
                 "Ctrl + Y : Redo"
             };
 
-            var list = new ListBox
+            var container = new Panel
             {
                 Location = new Point(24, 24),
                 Size = new Size(400, 400),
                 BackColor = Theme.FieldBg,
-                ForeColor = Theme.Text,
-                BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 9F)
+                AutoScroll = true
             };
-            list.Items.AddRange(shortcuts);
-            Controls.Add(list);
+            Controls.Add(container);
+
+            int y = 10;
+            foreach (var shortcut in shortcuts)
+            {
+                var lbl = new Label
+                {
+                    Location = new Point(10, y),
+                    Size = new Size(380, 20),
+                    Text = shortcut,
+                    Font = Theme.Base,
+                    ForeColor = Theme.Text,
+                    BackColor = Color.Transparent
+                };
+                container.Controls.Add(lbl);
+                y += 25;
+            }
 
             var close = new ModernButton
             {
