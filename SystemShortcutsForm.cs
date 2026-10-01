@@ -20,22 +20,39 @@ namespace MicroApp
 
             var shortcuts = new string[]
             {
-                "Win + D : Show/Hide Desktop",
-                "Win + E : Open File Explorer",
-                "Win + L : Lock Screen",
-                "Win + I : Settings",
-                "Win + V : Clipboard History",
-                "Alt + Tab : Switch Apps",
-                "Ctrl + Shift + Esc : Task Manager"
+                "Win + D : Show desktop",
+                "Win + L : Lock PC",
+                "Win + E : File Explorer",
+                "Win + R : Run dialog",
+                "Alt + Tab : Switch windows",
+                "Alt + F4 : Close window",
+                "Ctrl + Shift + Esc : Task Manager",
+                "Ctrl + Alt + Del : Security screen",
+                "Win + \u2191 : Maximize window",
+                "Win + \u2193 : Minimize / restore",
+                "Win + \u2190 : Snap left half",
+                "Win + \u2192 : Snap right half",
+                "Win + Home : Minimize all except active",
+                "Win + Shift + S : Screenshot (Snip Sketch)",
+                "Win + P : Display projection",
+                "Win + , : Desktop peek",
+                "Alt + F : File menu (in many apps)",
+                "Alt + Enter : Properties (in Explorer)",
+                "Ctrl + C : Copy",
+                "Ctrl + V : Paste",
+                "Ctrl + X : Cut",
+                "Ctrl + Z : Undo",
+                "Ctrl + Y : Redo"
             };
 
             var list = new ListBox
             {
                 Location = new Point(24, 24),
-                Size = new Size(300, 200),
+                Size = new Size(400, 400),
                 BackColor = Theme.FieldBg,
                 ForeColor = Theme.Text,
-                BorderStyle = BorderStyle.None
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9F)
             };
             list.Items.AddRange(shortcuts);
             Controls.Add(list);
@@ -44,13 +61,13 @@ namespace MicroApp
             {
                 Text = "Close",
                 Size = new Size(96, 36),
-                Location = new Point(126, 240),
+                Location = new Point(176, 440),
                 DialogResult = DialogResult.OK
             };
             close.Click += (s, e) => Close();
             Controls.Add(close);
 
-            ClientSize = new Size(348, 296);
+            ClientSize = new Size(448, 500);
             Theme.Apply(this);
         }
     }
