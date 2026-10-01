@@ -45,14 +45,48 @@ namespace MicroApp
                 "Ctrl + Y : Redo"
             };
 
+            // Add an icon and title area similar to ShortcutSettingsForm
+            var iconBox = new PictureBox
+            {
+                Location = new Point(28, 24),
+                Size = new Size(40, 40),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                TabStop = false
+            };
+            using (var large = new Icon(Properties.Resources.AppIcon, 40, 40))
+                iconBox.Image = large.ToBitmap();
+
+            var heading = new Label
+            {
+                Location = new Point(84, 24),
+                AutoSize = true,
+                Text = "System Shortcuts",
+                Font = new Font("Segoe UI Semibold", 12.5F),
+                ForeColor = Theme.Text,
+                BackColor = Color.Transparent
+            };
+            Controls.Add(iconBox);
+            Controls.Add(heading);
+
+            // Container for the list, styled as a card
+            var card = new Card
+            {
+                Location = new Point(24, 80),
+                Size = new Size(400, 350),
+                Title = "", // No title in card, we used a heading label
+                Description = ""
+            };
+            Controls.Add(card);
+
             var container = new Panel
             {
-                Location = new Point(24, 24),
-                Size = new Size(400, 400),
-                BackColor = Theme.FieldBg,
+                Location = new Point(15, 15),
+                Size = new Size(370, 320),
+                BackColor = Theme.Surface, // Matches card background
                 AutoScroll = true
             };
-            Controls.Add(container);
+            card.Controls.Add(container);
 
             int y = 10;
             foreach (var shortcut in shortcuts)
@@ -60,7 +94,7 @@ namespace MicroApp
                 var lbl = new Label
                 {
                     Location = new Point(10, y),
-                    Size = new Size(380, 20),
+                    Size = new Size(350, 20),
                     Text = shortcut,
                     Font = Theme.Base,
                     ForeColor = Theme.Text,
@@ -74,13 +108,13 @@ namespace MicroApp
             {
                 Text = "Close",
                 Size = new Size(96, 36),
-                Location = new Point(176, 440),
+                Location = new Point(328 - 96, card.Bottom + 14),
                 DialogResult = DialogResult.OK
             };
             close.Click += (s, e) => Close();
             Controls.Add(close);
 
-            ClientSize = new Size(448, 500);
+            ClientSize = new Size(448, close.Bottom + 20);
             Theme.Apply(this);
         }
     }
