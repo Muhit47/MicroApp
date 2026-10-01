@@ -1,4 +1,4 @@
-﻿using Gma.System.MouseKeyHook;
+using Gma.System.MouseKeyHook;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -338,6 +338,7 @@ namespace MicroApp
             note.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.NoteHotKey, Properties.Settings.Default.NoteHotKeyModifier);
             editor.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ImageEditorHotKey, Properties.Settings.Default.ImageEditorHotKeyModifier);
             var shortcuts = new ToolStripMenuItem("Shortcuts", null, Shortcuts) { Padding = new Padding(4, 3, 4, 3) };
+            var systemShortcuts = new ToolStripMenuItem("System Shortcuts", null, SystemShortcuts) { Padding = new Padding(4, 3, 4, 3) };
             var keySettings = new ToolStripMenuItem("Key Setting", null, Settings) { Padding = new Padding(4, 3, 4, 3) };
             var ocrSettings = new ToolStripMenuItem("OCR Setting", null, OcrSettings) { Padding = new Padding(4, 3, 4, 3) };
             var captureSettings = new ToolStripMenuItem("Capture Setting", null, CaptureSettings) { Padding = new Padding(4, 3, 4, 3) };
@@ -355,6 +356,7 @@ namespace MicroApp
             menu.Items.Add(editor);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(shortcuts);
+            menu.Items.Add(systemShortcuts);
             menu.Items.Add(keySettings);
             menu.Items.Add(ocrSettings);
             menu.Items.Add(captureSettings);
@@ -1742,6 +1744,21 @@ namespace MicroApp
             StopAllHotKeys();
             var settings = new ShortcutSettingsForm();
             settings.ShowDialog();
+            _settingsOpen = false;
+            StartAllHotKeys();
+            RefreshTrayMenu();
+        }
+
+        void SystemShortcuts(object sender, EventArgs e)
+        {
+            if (_settingsOpen)
+            {
+                return;
+            }
+            _settingsOpen = true;
+            StopAllHotKeys();
+            var form = new SystemShortcutsForm();
+            form.ShowDialog();
             _settingsOpen = false;
             StartAllHotKeys();
             RefreshTrayMenu();
