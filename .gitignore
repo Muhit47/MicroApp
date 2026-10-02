@@ -1,5 +1,5 @@
 /obj
-/bin/Debug
-/bin/Release/*.pdb
+/bin
 /.vs
+/Setup/obj
 /Setup/nsis/*.exe

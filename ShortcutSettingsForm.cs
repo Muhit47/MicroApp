@@ -18,8 +18,10 @@ namespace MicroApp
             public string Label;
             public string KeySetting;
             public string ModSetting;
+            public string EnabledSetting; // ADDED
             public TextBox Letter;
             public ModernCheckBox[] Mods;   // Alt=1, Ctrl=2, Shift=4, Win=8
+            public ModernToggle EnabledToggle;
         }
 
         readonly List<HotKeyRow> _rows = new List<HotKeyRow>();
@@ -80,22 +82,28 @@ namespace MicroApp
             Controls.Add(subtitle);
 
             // ----- hot keys card ------------------------------------------------------
+            const int CardW = 592;
             var card = new Card
             {
                 Location = new Point(24, 96),
-                Size = new Size(548, 92 + (RowH * 10)),
+                Size = new Size(CardW, 90 + (RowH * 11)),
                 Title = "Hot keys",
                 Description = "Tick the modifiers and give each action a key."
             };
             Controls.Add(card);
 
-            int headY = 58;
-            int colLabel = 20, colMods = 208, colKey = colMods + 4 * 62 + 6;
+            int headY = 56;
+            int colLabel = 20;
+            int colMods = 175;
+            int colKey = 352;
+            int colEnabled = 415;
+            int colReset = 485;
+
             for (int m = 0; m < 4; m++)
             {
                 card.Controls.Add(new Label
                 {
-                    Location = new Point(colMods + m * 62, headY),
+                    Location = new Point(colMods + m * 42, headY),
                     AutoSize = true,
                     Text = ModNames[m],
                     Font = Theme.Small,
@@ -105,38 +113,57 @@ namespace MicroApp
             }
             card.Controls.Add(new Label
             {
-                Location = new Point(colKey + 2, headY),
+                Location = new Point(colKey + 7, headY),
                 AutoSize = true,
                 Text = "Key",
                 Font = Theme.Small,
                 ForeColor = Theme.TextDim,
                 BackColor = Color.Transparent
             });
+            card.Controls.Add(new Label
+            {
+                Location = new Point(colEnabled, headY),
+                AutoSize = true,
+                Text = "On/Off",
+                Font = Theme.Small,
+                ForeColor = Theme.TextDim,
+                BackColor = Color.Transparent
+            });
+            card.Controls.Add(new Label
+            {
+                Location = new Point(colReset + 12, headY),
+                AutoSize = true,
+                Text = "Reset",
+                Font = Theme.Small,
+                ForeColor = Theme.TextDim,
+                BackColor = Color.Transparent
+            });
 
-            int y = headY + 24;
-            AddRow(card, y + RowH * 0, colLabel, colMods, colKey, "Paste as keystrokes", "HotKey", "HotKeyModifier");
-            AddRow(card, y + RowH * 1, colLabel, colMods, colKey, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier");
-            AddRow(card, y + RowH * 2, colLabel, colMods, colKey, "Pick Text", "TextPickHotKey", "TextPickHotKeyModifier");
-            AddRow(card, y + RowH * 3, colLabel, colMods, colKey, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier");
-            AddRow(card, y + RowH * 4, colLabel, colMods, colKey, "Record GIF", "GifHotKey", "GifHotKeyModifier");
-            AddRow(card, y + RowH * 5, colLabel, colMods, colKey, "Record Video", "VideoHotKey", "VideoHotKeyModifier");
-            AddRow(card, y + RowH * 6, colLabel, colMods, colKey, "New note", "NoteHotKey", "NoteHotKeyModifier");
-            AddRow(card, y + RowH * 7, colLabel, colMods, colKey, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier");
-            AddRow(card, y + RowH * 8, colLabel, colMods, colKey, "Type the date", "DateHotKey", "DateHotKeyModifier");
-            AddRow(card, y + RowH * 9, colLabel, colMods, colKey, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier");
+            int y = headY + 26;
+            AddRow(card, y + RowH * 0, colLabel, colMods, colKey, colEnabled, colReset, "Paste as keystrokes", "HotKey", "HotKeyModifier", "HotKeyEnabled");
+            AddRow(card, y + RowH * 1, colLabel, colMods, colKey, colEnabled, colReset, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier", "OcrHotKeyEnabled");
+            AddRow(card, y + RowH * 2, colLabel, colMods, colKey, colEnabled, colReset, "Pick Text", "TextPickHotKey", "TextPickHotKeyModifier", "TextPickHotKeyEnabled");
+            AddRow(card, y + RowH * 3, colLabel, colMods, colKey, colEnabled, colReset, "Pick color", "ColorPickHotKey", "ColorPickHotKeyModifier", "ColorPickHotKeyEnabled");
+            AddRow(card, y + RowH * 4, colLabel, colMods, colKey, colEnabled, colReset, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier", "CaptureHotKeyEnabled");
+            AddRow(card, y + RowH * 5, colLabel, colMods, colKey, colEnabled, colReset, "Record GIF", "GifHotKey", "GifHotKeyModifier", "GifHotKeyEnabled");
+            AddRow(card, y + RowH * 6, colLabel, colMods, colKey, colEnabled, colReset, "Record Video", "VideoHotKey", "VideoHotKeyModifier", "VideoHotKeyEnabled");
+            AddRow(card, y + RowH * 7, colLabel, colMods, colKey, colEnabled, colReset, "New note", "NoteHotKey", "NoteHotKeyModifier", "NoteHotKeyEnabled");
+            AddRow(card, y + RowH * 8, colLabel, colMods, colKey, colEnabled, colReset, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier", "ImageEditorHotKeyEnabled");
+            AddRow(card, y + RowH * 9, colLabel, colMods, colKey, colEnabled, colReset, "Type the date", "DateHotKey", "DateHotKeyModifier", "DateHotKeyEnabled");
+            AddRow(card, y + RowH * 10, colLabel, colMods, colKey, colEnabled, colReset, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier", "LongDateHotKeyEnabled");
 
             // ----- date formats card --------------------------------------------------
             var dates = new Card
             {
                 Location = new Point(24, card.Bottom + 12),
-                Size = new Size(548, 150),
+                Size = new Size(CardW, 142),
                 Title = "Typed dates",
                 Description = "What the date hot keys type into the focused window. Shared with the note toolbar's date buttons."
             };
             Controls.Add(dates);
 
-            _dateBox = FormatRow(dates, 62, "Date", Properties.Settings.Default.NoteDateFormat, out _datePreview);
-            _longDateBox = FormatRow(dates, 94, "Long date", Properties.Settings.Default.NoteLongDateFormat, out _longDatePreview);
+            _dateBox = FormatRow(dates, 58, "Date", Properties.Settings.Default.NoteDateFormat, out _datePreview);
+            _longDateBox = FormatRow(dates, 92, "Long date", Properties.Settings.Default.NoteLongDateFormat, out _longDatePreview);
             UpdatePreviews();
 
             // ----- buttons ------------------------------------------------------------
@@ -145,7 +172,7 @@ namespace MicroApp
                 Text = "Save",
                 Accent = true,
                 Size = new Size(112, 36),
-                Location = new Point(548 + 24 - 112, dates.Bottom + 14)
+                Location = new Point(24 + CardW - 112, dates.Bottom + 14)
             };
             save.Click += Save_Click;
             var cancel = new ModernButton
@@ -160,7 +187,7 @@ namespace MicroApp
             AcceptButton = save;
             CancelButton = cancel;
 
-            ClientSize = new Size(548 + 48, save.Bottom + 20);
+            ClientSize = new Size(CardW + 48, save.Bottom + 20);
             ResumeLayout();
 
             Theme.Apply(this);
@@ -169,9 +196,9 @@ namespace MicroApp
             Icon = Properties.Resources.AppIcon;
         }
 
-        void AddRow(Card card, int y, int colLabel, int colMods, int colKey, string label, string keySetting, string modSetting)
+        void AddRow(Card card, int y, int colLabel, int colMods, int colKey, int colEnabled, int colReset, string label, string keySetting, string modSetting, string enabledSetting)
         {
-            var row = new HotKeyRow { Label = label, KeySetting = keySetting, ModSetting = modSetting };
+            var row = new HotKeyRow { Label = label, KeySetting = keySetting, ModSetting = modSetting, EnabledSetting = enabledSetting };
 
             card.Controls.Add(new Label
             {
@@ -189,8 +216,8 @@ namespace MicroApp
             {
                 var check = new ModernCheckBox
                 {
-                    Location = new Point(colMods + m * 62 - 2, y + 2),
-                    AutoSize = true,
+                    Location = new Point(colMods + m * 42, y + 4),
+                    Size = new Size(18, 18),
                     Text = "",
                     Checked = (mods & ModBits[m]) != 0
                 };
@@ -200,8 +227,8 @@ namespace MicroApp
 
             row.Letter = new TextBox
             {
-                Location = new Point(colKey, y + 1),
-                Size = new Size(42, 24),
+                Location = new Point(colKey, y + 2),
+                Size = new Size(38, 22),
                 MaxLength = 12,
                 Text = (string)Properties.Settings.Default[keySetting],
                 TextAlign = HorizontalAlignment.Center,
@@ -211,7 +238,40 @@ namespace MicroApp
                 CharacterCasing = CharacterCasing.Upper
             };
             card.Controls.Add(row.Letter);
+
+            row.EnabledToggle = new ModernToggle
+            {
+                Location = new Point(colEnabled + 1, y + 3),
+                Checked = (bool)Properties.Settings.Default[enabledSetting]
+            };
+            card.Controls.Add(row.EnabledToggle);
+
+            AddResetButton(card, y, colReset, row);
+
             _rows.Add(row);
+        }
+
+        private void AddResetButton(Card card, int y, int colReset, HotKeyRow row)
+        {
+            var reset = new ModernButton
+            {
+                Text = "Reset",
+                Size = new Size(58, 24),
+                Location = new Point(colReset, y + 1)
+            };
+            reset.Click += (s, e) =>
+            {
+                var propKey = Properties.Settings.Default.Properties[row.KeySetting];
+                row.Letter.Text = propKey?.DefaultValue != null ? propKey.DefaultValue.ToString() : "";
+                
+                var propMod = Properties.Settings.Default.Properties[row.ModSetting];
+                int mods = propMod?.DefaultValue != null ? Convert.ToInt32(propMod.DefaultValue) : 0;
+                for (int m = 0; m < 4; m++) row.Mods[m].Checked = (mods & ModBits[m]) != 0;
+                
+                var propEnabled = Properties.Settings.Default.Properties[row.EnabledSetting];
+                row.EnabledToggle.Checked = propEnabled?.DefaultValue == null || Convert.ToBoolean(propEnabled.DefaultValue);
+            };
+            card.Controls.Add(reset);
         }
 
         TextBox FormatRow(Card card, int y, string label, string value, out Label preview)
@@ -268,6 +328,7 @@ namespace MicroApp
             var seen = new Dictionary<string, string>();
             foreach (HotKeyRow row in _rows)
             {
+                if (!row.EnabledToggle.Checked) continue;
                 string letter = row.Letter.Text.Trim();
                 if (letter.Length == 0) continue;
                 int mods = RowMods(row);
@@ -289,6 +350,7 @@ namespace MicroApp
                 if (letter.Length == 1) letter = letter.ToUpperInvariant();
                 Properties.Settings.Default[row.KeySetting] = letter;
                 Properties.Settings.Default[row.ModSetting] = RowMods(row);
+                Properties.Settings.Default[row.EnabledSetting] = row.EnabledToggle.Checked;
             }
             Properties.Settings.Default.NoteDateFormat = _dateBox.Text.Trim();
             Properties.Settings.Default.NoteLongDateFormat = _longDateBox.Text.Trim();

@@ -1,5 +1,29 @@
 # Changelog
 
+## 5.4.0 — 2026-10-02
+
+### Added
+
+- **Screen Color Picker with Loupe & Inspector.** Press **Ctrl+Alt+C** (or choose *Color Picker* from the tray menu) to inspect and pick colors from any screen:
+  - **Real-time 11×11 pixel magnifier loupe** follows your cursor with a reticle and live HEX badge.
+  - **Single-click instant copy**: Copies `#RRGGBB` directly to clipboard with a toast notification.
+  - **Color Details inspector dialog**: View preview swatches, copyable HEX, RGB, and HSL formats with dedicated copy buttons.
+  - **Recent Colors palette**: Persists up to 10 recently picked colors across sessions for fast re-inspection and reuse.
+- **Productivity Shortcuts Cheat Sheet Hub.** A comprehensive dark-themed offline shortcut reference accessible from the tray menu (*Shortcuts Cheat Sheet*):
+  - **145 essential shortcuts across 4 applications**:
+    - **Windows** (55 shortcuts): Window management, desktop & taskbar, accessibility, system navigation.
+    - **Microsoft Word** (32 shortcuts): File & basic actions, formatting, clipboard, alignment, navigation & edit, shortcut tools.
+    - **Microsoft Excel** (30 shortcuts): File & basics, selection & navigation, formulas & calculations, cell formatting, rows & columns, workbook & sheets.
+    - **Microsoft PowerPoint** (28 shortcuts): Slide show presentation, slide management, formatting & editing, shapes & objects, view & navigation.
+  - **App Switcher tabs** with active badges to quickly jump between applications.
+  - **Categorized section divider cards** matching cheat sheet layouts.
+  - **Instant real-time search** to filter any shortcut by action name or key combination.
+- **ModernToggle switch control.** Smooth fluent toggle switch component with hover transitions and keyboard accessibility.
+
+### Fixed
+
+- **Shortcut Settings reset:** Fixed `InvalidCastException` when restoring default hotkey settings with string-typed defaults.
+
 ## 5.3.1 — 2026-09-26
 
 ### Added

@@ -75,7 +75,6 @@ namespace MicroApp
 
         // ---- tools -----------------------------------------------------------------
         Tool _tool = Tool.Move;
-        Tool _toolBeforeSpace;
         bool _spaceDown;
 
         [DllImport("user32.dll")]

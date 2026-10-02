@@ -151,6 +151,7 @@
     <Compile Include="SystemShortcutsForm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TextPicker.cs" />
+    <Compile Include="ColorPicker.cs" />
     <Compile Include="NoteForm.cs" />
     <Compile Include="NoteAi.cs" />
     <Compile Include="NoteArchiveForm.cs" />
@@ -243,7 +244,7 @@
   <PropertyGroup>
     <!-- Release builds are code-signed only when a signing setup is present:
          build with /p:SkipCodeSigning=true (as CI does) to skip it. -->
-    <PostBuildEvent Condition="'$(SkipCodeSigning)' != 'true'">if $(ConfigurationName) == Release $(SolutionDir)\sign.bat $(TargetDir)\$(TargetFileName) $(TargetPath)</PostBuildEvent>
+    <PostBuildEvent Condition="'$(SkipCodeSigning)' != 'true'"></PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

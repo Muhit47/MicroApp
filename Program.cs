@@ -262,6 +262,12 @@ namespace MicroApp
         bool _pickPeekBusy;
         IntPtr _pickTarget;
 
+        // color picker: loupe magnifier, pixel-accurate inspection, instant copy + inspector dialog
+        int? _colorPickHotKey;
+        EventHandler<HotKeyEventArgs> _colorPickHotKeyHandler = null;
+        IKeyboardMouseEvents _colorPickHook;
+        ColorLoupeForm _colorLoupe;
+
         // hot keys are raised on HotKeyManager's own message loop; this marshals the
         // UI work (overlay, dialogs, clipboard) back onto the tray thread
         Control _sync;
@@ -278,6 +284,7 @@ namespace MicroApp
             StartGifHotKey();
             StartVideoHotKey();
             StartTextPickHotKey();
+            StartColorPickHotKey();
             StartNoteHotKey();
             StartImageEditorHotKey();
             StartDateHotKey();
@@ -323,6 +330,7 @@ namespace MicroApp
 
             var grab = new ToolStripMenuItem("Grab text (OCR)", null, GrabText) { Padding = new Padding(4, 3, 4, 3) };
             var pick = new ToolStripMenuItem("Pick Text", null, PickText) { Padding = new Padding(4, 3, 4, 3) };
+            var pickColor = new ToolStripMenuItem("Pick Color", null, PickColor) { Padding = new Padding(4, 3, 4, 3) };
             var capture = new ToolStripMenuItem("Screen Capture", null, ScreenCapture) { Padding = new Padding(4, 3, 4, 3) };
             var gif = new ToolStripMenuItem("Record GIF", null, RecordGif) { Padding = new Padding(4, 3, 4, 3) };
             var video = new ToolStripMenuItem("Record Video", null, RecordVideo) { Padding = new Padding(4, 3, 4, 3) };
@@ -332,13 +340,14 @@ namespace MicroApp
             // each feature shows its current hot key, so the menu doubles as a cheat sheet
             grab.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.OcrHotKey, Properties.Settings.Default.OcrHotKeyModifier);
             pick.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.TextPickHotKey, Properties.Settings.Default.TextPickHotKeyModifier);
+            pickColor.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier);
             capture.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.CaptureHotKey, Properties.Settings.Default.CaptureHotKeyModifier);
             gif.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.GifHotKey, Properties.Settings.Default.GifHotKeyModifier);
             video.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.VideoHotKey, Properties.Settings.Default.VideoHotKeyModifier);
             note.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.NoteHotKey, Properties.Settings.Default.NoteHotKeyModifier);
             editor.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ImageEditorHotKey, Properties.Settings.Default.ImageEditorHotKeyModifier);
             var shortcuts = new ToolStripMenuItem("Shortcuts", null, Shortcuts) { Padding = new Padding(4, 3, 4, 3) };
-            var systemShortcuts = new ToolStripMenuItem("System Shortcuts", null, SystemShortcuts) { Padding = new Padding(4, 3, 4, 3) };
+            var systemShortcuts = new ToolStripMenuItem("Shortcuts Cheat Sheet", null, SystemShortcuts) { Padding = new Padding(4, 3, 4, 3) };
             var keySettings = new ToolStripMenuItem("Key Setting", null, Settings) { Padding = new Padding(4, 3, 4, 3) };
             var ocrSettings = new ToolStripMenuItem("OCR Setting", null, OcrSettings) { Padding = new Padding(4, 3, 4, 3) };
             var captureSettings = new ToolStripMenuItem("Capture Setting", null, CaptureSettings) { Padding = new Padding(4, 3, 4, 3) };
@@ -349,6 +358,7 @@ namespace MicroApp
             var exit = new ToolStripMenuItem("Exit", null, Exit) { Padding = new Padding(4, 3, 4, 3) };
             menu.Items.Add(grab);
             menu.Items.Add(pick);
+            menu.Items.Add(pickColor);
             menu.Items.Add(capture);
             menu.Items.Add(gif);
             menu.Items.Add(video);
@@ -677,6 +687,7 @@ namespace MicroApp
         void StartHotKey()
         {
             StopHotKey();
+            if (!Properties.Settings.Default.HotKeyEnabled) return; // ADDED
             var hotkeyLetter = Properties.Settings.Default.HotKey;
             if (!string.IsNullOrEmpty(hotkeyLetter))
             {
@@ -722,6 +733,7 @@ namespace MicroApp
         void StartOcrHotKey()
         {
             StopOcrHotKey();
+            if (!Properties.Settings.Default.OcrHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.OcrHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -887,6 +899,7 @@ namespace MicroApp
         void StartCaptureHotKey()
         {
             StopCaptureHotKey();
+            if (!Properties.Settings.Default.CaptureHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.CaptureHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1060,6 +1073,7 @@ namespace MicroApp
         void StartGifHotKey()
         {
             StopGifHotKey();
+            if (!Properties.Settings.Default.GifHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.GifHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1245,6 +1259,7 @@ namespace MicroApp
         void StartVideoHotKey()
         {
             StopVideoHotKey();
+            if (!Properties.Settings.Default.VideoHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.VideoHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1537,6 +1552,7 @@ namespace MicroApp
         void StartNoteHotKey()
         {
             StopNoteHotKey();
+            if (!Properties.Settings.Default.NoteHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.NoteHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1600,6 +1616,7 @@ namespace MicroApp
         void StartImageEditorHotKey()
         {
             StopImageEditorHotKey();
+            if (!Properties.Settings.Default.ImageEditorHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.ImageEditorHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1648,6 +1665,7 @@ namespace MicroApp
         void StartDateHotKey()
         {
             StopDateHotKey();
+            if (!Properties.Settings.Default.DateHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.DateHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1684,6 +1702,7 @@ namespace MicroApp
         void StartLongDateHotKey()
         {
             StopLongDateHotKey();
+            if (!Properties.Settings.Default.LongDateHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.LongDateHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1767,6 +1786,7 @@ namespace MicroApp
         void StartTextPickHotKey()
         {
             StopTextPickHotKey();
+            if (!Properties.Settings.Default.TextPickHotKeyEnabled) return; // ADDED
             var letter = Properties.Settings.Default.TextPickHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
@@ -1957,6 +1977,173 @@ namespace MicroApp
             });
         }
 
+        void StartColorPickHotKey()
+        {
+            StopColorPickHotKey();
+            if (!Properties.Settings.Default.ColorPickHotKeyEnabled) return;
+            var letter = Properties.Settings.Default.ColorPickHotKey;
+            if (string.IsNullOrEmpty(letter)) return;
+            try
+            {
+                Keys key = (Keys)Enum.Parse(typeof(Keys), letter);
+                _colorPickHotKey = RegisterOrTakeOver("Color picker", key, (KeyModifiers)Properties.Settings.Default.ColorPickHotKeyModifier, "ColorPickHotKeyTakeOver");
+                if (!_colorPickHotKey.HasValue) return;
+                _colorPickHotKeyHandler = new EventHandler<HotKeyEventArgs>(HotKeyManager_ColorPickHotKeyPressed);
+                HotKeyManager.HotKeyPressed += _colorPickHotKeyHandler;
+            }
+            catch (Exception e)
+            {
+                ModernDialog.Info("Color picker hot key unavailable", "Another app is probably using it.\r\n\r\n" + e.Message);
+            }
+        }
+
+        void StopColorPickHotKey()
+        {
+            if (_colorPickHotKey.HasValue)
+            {
+                HotKeyManager.HotKeyPressed -= _colorPickHotKeyHandler;
+                HotKeyManager.UnregisterHotKey(_colorPickHotKey.Value);
+            }
+            _colorPickHotKey = null;
+            _colorPickHotKeyHandler = null;
+        }
+
+        private void HotKeyManager_ColorPickHotKeyPressed(object sender, HotKeyEventArgs e)
+        {
+            if (!Matches(e, Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier)) return;
+
+            // pressing the hot key again while picking cancels it
+            if (_colorPickHook != null)
+            {
+                _sync.BeginInvoke(new Action(CancelColorPick));
+                return;
+            }
+            BeginColorPick();
+        }
+
+        void PickColor(object sender, EventArgs e)
+        {
+            BeginColorPick();
+        }
+
+        void BeginColorPick()
+        {
+            if (_settingsOpen) return;
+            if (_sync.InvokeRequired) _sync.BeginInvoke(new Action(StartColorPick));
+            else StartColorPick();
+        }
+
+        void StartColorPick()
+        {
+            if (_ocrBusy || _colorPickHook != null || _pickHook != null || _recorder != null || _videoRecorder != null) return;
+
+            // change cursors to crosshair
+            uint[] cursors = { Native.NORMAL, Native.IBEAM, Native.HAND };
+            for (int i = 0; i < cursors.Length; i++)
+                Native.SetSystemCursor(Native.CopyIcon(Native.LoadCursor(IntPtr.Zero, (int)Native.CROSS)), cursors[i]);
+
+            // snapshot screen once for the loupe
+            var bounds = SystemInformation.VirtualScreen;
+            var bmp = new Bitmap(bounds.Width, bounds.Height);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
+            }
+
+            _colorLoupe = new ColorLoupeForm(bmp, bounds);
+            _colorLoupe.UpdateCursor(Cursor.Position);
+            _colorLoupe.Show();
+
+            _colorPickHook = Hook.GlobalEvents();
+            _colorPickHook.MouseMove += _colorPickHook_MouseMove;
+            _colorPickHook.MouseDownExt += _colorPickHook_MouseDownExt;
+            _colorPickHook.KeyDown += _colorPickHook_KeyDown;
+        }
+
+        private void _colorPickHook_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_colorLoupe != null && !_colorLoupe.IsDisposed)
+            {
+                _colorLoupe.UpdateCursor(e.Location);
+            }
+        }
+
+        private void _colorPickHook_MouseDownExt(object sender, MouseEventExtArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                e.Handled = true;
+                Color chosen = _colorLoupe != null ? _colorLoupe.CurrentColor : Color.Black;
+                string hex = _colorLoupe != null ? _colorLoupe.CurrentHex : ColorUtils.ToHex(chosen);
+                _sync.BeginInvoke(new Action(() => FinishColorPick(chosen, hex)));
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                e.Handled = true;
+                _sync.BeginInvoke(new Action(CancelColorPick));
+            }
+        }
+
+        private void _colorPickHook_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                _sync.BeginInvoke(new Action(CancelColorPick));
+            }
+        }
+
+        void CancelColorPick()
+        {
+            EndColorPick();
+        }
+
+        void EndColorPick()
+        {
+            if (_colorPickHook != null)
+            {
+                _colorPickHook.MouseMove -= _colorPickHook_MouseMove;
+                _colorPickHook.MouseDownExt -= _colorPickHook_MouseDownExt;
+                _colorPickHook.KeyDown -= _colorPickHook_KeyDown;
+                _colorPickHook.Dispose();
+                _colorPickHook = null;
+            }
+            if (_colorLoupe != null)
+            {
+                _colorLoupe.Close();
+                _colorLoupe.Dispose();
+                _colorLoupe = null;
+            }
+            Native.SystemParametersInfo(0x0057, 0, null, 0); // restore real cursors
+        }
+
+        void FinishColorPick(Color color, string hex)
+        {
+            if (_colorPickHook == null && _colorLoupe == null) return;
+            EndColorPick();
+
+            if (SetClipboard(hex))
+            {
+                Toast.Show($"Copied {hex} to the clipboard.");
+            }
+            else
+            {
+                SystemSounds.Beep.Play();
+                ModernDialog.Info("Clipboard is busy", "Another app is holding the clipboard. Try again.");
+            }
+
+            ColorUtils.AddToHistory(hex);
+
+            _settingsOpen = true;
+            StopAllHotKeys();
+            using (var dlg = new ColorInspectorDialog(color))
+            {
+                dlg.ShowDialog();
+            }
+            _settingsOpen = false;
+            StartAllHotKeys();
+        }
+
         void StopHotKey()
         {
             if(_usingHotKey.HasValue)
@@ -2068,6 +2255,7 @@ namespace MicroApp
             StopGifHotKey();
             StopVideoHotKey();
             StopTextPickHotKey();
+            StopColorPickHotKey();
             StopNoteHotKey();
             StopImageEditorHotKey();
             StopDateHotKey();
@@ -2082,6 +2270,7 @@ namespace MicroApp
             StartGifHotKey();
             StartVideoHotKey();
             StartTextPickHotKey();
+            StartColorPickHotKey();
             StartNoteHotKey();
             StartImageEditorHotKey();
             StartDateHotKey();
@@ -2093,6 +2282,7 @@ namespace MicroApp
             if (_recorder != null) FinishGifRecording();
             if (_videoRecorder != null) FinishVideoRecording();
             EndTextPick();
+            EndColorPick();
             EndTrack();
             // Hide tray icon, otherwise it will remain shown until user mouses over it
             _notify.Visible = false;

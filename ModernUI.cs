@@ -176,7 +176,7 @@ namespace MicroApp
             }
             else if (root is TextBox box)
             {
-                box.BorderStyle = BorderStyle.None;
+                if (box.Parent is FieldHost) box.BorderStyle = BorderStyle.None;
                 box.BackColor = FieldBg;
                 box.ForeColor = Text;
                 box.Font = Base;
@@ -561,6 +561,94 @@ namespace MicroApp
                     var textSize = TextRenderer.MeasureText(Text, Theme.Base);
                     g.DrawRectangle(focus, new Rectangle(textRect.X - 3, (Height - textSize.Height) / 2 - 2,
                                                          Math.Min(textSize.Width + 5, textRect.Width), textSize.Height + 3));
+                }
+            }
+        }
+    }
+
+    /// <summary>Toggle switch drawn as a modern pill track with a sliding thumb.</summary>
+    public class ModernToggle : CheckBox
+    {
+        private bool _hover;
+
+        public ModernToggle()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.UserPaint | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            AutoSize = false;
+            Size = new Size(36, 20);
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseEnter(EventArgs e) { _hover = true; Invalidate(); base.OnMouseEnter(e); }
+        protected override void OnMouseLeave(EventArgs e) { _hover = false; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnCheckedChanged(EventArgs e) { Invalidate(); base.OnCheckedChanged(e); }
+        protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+        protected override void OnLostFocus(EventArgs e) { Invalidate(); base.OnLostFocus(e); }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            Theme.PaintBackdrop(this, g);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            int trackW = 34;
+            int trackH = 18;
+            int x = (Width - trackW) / 2;
+            int y = (Height - trackH) / 2;
+            var trackRect = new Rectangle(x, y, trackW, trackH);
+
+            int thumbD = 12;
+            int thumbY = y + (trackH - thumbD) / 2;
+            int thumbX = Checked ? (x + trackW - thumbD - 3) : (x + 3);
+
+            using (var trackPath = Theme.Round(trackRect, trackH / 2))
+            {
+                if (Checked)
+                {
+                    Color trackColor = !Enabled
+                        ? (Theme.Dark ? Color.FromArgb(60, 60, 70) : Color.FromArgb(200, 200, 210))
+                        : (_hover ? Theme.AccentHover : Theme.Accent);
+                    using (var fill = new SolidBrush(trackColor))
+                    using (var pen = new Pen(trackColor))
+                    {
+                        g.FillPath(fill, trackPath);
+                        g.DrawPath(pen, trackPath);
+                    }
+
+                    Color thumbColor = !Enabled ? Color.FromArgb(140, 140, 140) : Color.White;
+                    using (var thumbBrush = new SolidBrush(thumbColor))
+                    {
+                        g.FillEllipse(thumbBrush, thumbX, thumbY, thumbD, thumbD);
+                    }
+                }
+                else
+                {
+                    Color trackColor = Theme.Dark ? Color.FromArgb(36, 36, 42) : Color.FromArgb(235, 235, 240);
+                    Color borderColor = _hover ? Theme.Accent : Theme.FieldBorder;
+                    using (var fill = new SolidBrush(trackColor))
+                    using (var pen = new Pen(borderColor, 1.4f))
+                    {
+                        g.FillPath(fill, trackPath);
+                        g.DrawPath(pen, trackPath);
+                    }
+
+                    Color thumbColor = Theme.Dark ? Color.FromArgb(170, 170, 180) : Color.FromArgb(110, 110, 120);
+                    if (_hover) thumbColor = Theme.Text;
+                    using (var thumbBrush = new SolidBrush(thumbColor))
+                    {
+                        g.FillEllipse(thumbBrush, thumbX, thumbY, thumbD, thumbD);
+                    }
+                }
+            }
+
+            if (Focused && ShowFocusCues)
+            {
+                using (var focus = new Pen(Theme.Accent) { DashStyle = DashStyle.Dot })
+                using (var focusPath = Theme.Round(Rectangle.Inflate(trackRect, 2, 2), (trackH + 4) / 2))
+                {
+                    g.DrawPath(focus, focusPath);
                 }
             }
         }
