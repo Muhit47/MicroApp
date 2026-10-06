@@ -3,3 +3,4 @@
 /.vs
 /Setup/obj
 /Setup/nsis/*.exe
+/Setup/nsis/*.zip

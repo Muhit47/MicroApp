@@ -86,7 +86,11 @@ namespace MicroApp
             var card = new Card
             {
                 Location = new Point(24, 96),
+<<<<<<< HEAD
                 Size = new Size(CardW, 90 + (RowH * 11)),
+=======
+                Size = new Size(548, 92 + (RowH * 11)),
+>>>>>>> aedeb4826494849d94158f8faa10a63d0533dfa0
                 Title = "Hot keys",
                 Description = "Tick the modifiers and give each action a key."
             };
@@ -139,6 +143,7 @@ namespace MicroApp
                 BackColor = Color.Transparent
             });
 
+<<<<<<< HEAD
             int y = headY + 26;
             AddRow(card, y + RowH * 0, colLabel, colMods, colKey, colEnabled, colReset, "Paste as keystrokes", "HotKey", "HotKeyModifier", "HotKeyEnabled");
             AddRow(card, y + RowH * 1, colLabel, colMods, colKey, colEnabled, colReset, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier", "OcrHotKeyEnabled");
@@ -151,6 +156,20 @@ namespace MicroApp
             AddRow(card, y + RowH * 8, colLabel, colMods, colKey, colEnabled, colReset, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier", "ImageEditorHotKeyEnabled");
             AddRow(card, y + RowH * 9, colLabel, colMods, colKey, colEnabled, colReset, "Type the date", "DateHotKey", "DateHotKeyModifier", "DateHotKeyEnabled");
             AddRow(card, y + RowH * 10, colLabel, colMods, colKey, colEnabled, colReset, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier", "LongDateHotKeyEnabled");
+=======
+            int y = headY + 24;
+            AddRow(card, y + RowH * 0, colLabel, colMods, colKey, "Paste as keystrokes", "HotKey", "HotKeyModifier");
+            AddRow(card, y + RowH * 1, colLabel, colMods, colKey, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier");
+            AddRow(card, y + RowH * 2, colLabel, colMods, colKey, "Pick Text", "TextPickHotKey", "TextPickHotKeyModifier");
+            AddRow(card, y + RowH * 3, colLabel, colMods, colKey, "Always on top", "AotHotKey", "AotHotKeyModifier");
+            AddRow(card, y + RowH * 4, colLabel, colMods, colKey, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier");
+            AddRow(card, y + RowH * 5, colLabel, colMods, colKey, "Record GIF", "GifHotKey", "GifHotKeyModifier");
+            AddRow(card, y + RowH * 6, colLabel, colMods, colKey, "Record Video", "VideoHotKey", "VideoHotKeyModifier");
+            AddRow(card, y + RowH * 7, colLabel, colMods, colKey, "New note", "NoteHotKey", "NoteHotKeyModifier");
+            AddRow(card, y + RowH * 8, colLabel, colMods, colKey, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier");
+            AddRow(card, y + RowH * 9, colLabel, colMods, colKey, "Type the date", "DateHotKey", "DateHotKeyModifier");
+            AddRow(card, y + RowH * 10, colLabel, colMods, colKey, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier");
+>>>>>>> aedeb4826494849d94158f8faa10a63d0533dfa0
 
             // ----- date formats card --------------------------------------------------
             var dates = new Card
