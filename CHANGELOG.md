@@ -1,6 +1,15 @@
 # Changelog
 
-<<<<<<< HEAD
+## 5.4.1 — 2026-10-09
+
+### Added
+
+- **Unified Always on Top shortcut toggle:** "Always on top" is now integrated into the unified Shortcuts settings window with its own On/Off toggle switch and reset button.
+
+### Changed
+
+- **Typing Setting:** Renamed "Key Setting" to "Typing Setting" across the tray menu, settings dialogs, and documentation to more clearly describe its purpose.
+
 ## 5.4.0 — 2026-10-02
 
 ### Added
@@ -24,7 +33,7 @@
 ### Fixed
 
 - **Shortcut Settings reset:** Fixed `InvalidCastException` when restoring default hotkey settings with string-typed defaults.
-=======
+
 ## 5.3.3 — 2026-10-02
 
 ### Fixed
@@ -63,7 +72,6 @@
 - **The capture countdown shows the area clearly.** A heavier blue frame marks what will be taken, and it
   now also shows in screenshots and remote-desktop views of the screen. It is gone before the shot, so it
   never ends up in the picture.
->>>>>>> aedeb4826494849d94158f8faa10a63d0533dfa0
 
 ## 5.3.1 — 2026-09-26
 

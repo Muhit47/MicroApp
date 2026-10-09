@@ -110,6 +110,18 @@ namespace MicroApp.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AotHotKeyEnabled {
+            get {
+                return ((bool)(this["AotHotKeyEnabled"]));
+            }
+            set {
+                this["AotHotKeyEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool NoteHotKeyEnabled {
             get {
                 return ((bool)(this["NoteHotKeyEnabled"]));

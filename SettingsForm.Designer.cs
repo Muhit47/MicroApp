@@ -105,7 +105,7 @@ namespace MicroApp
             this.titleLabel.BackColor = Color.Transparent;
             this.titleLabel.Location = new Point(76, 19);
             this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Text = "MicroApp";
+            this.titleLabel.Text = "Typing";
             //
             // subtitleLabel
             //
@@ -435,7 +435,7 @@ namespace MicroApp
             this.Name = "SettingsForm";
             this.SizeGripStyle = SizeGripStyle.Hide;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Text = "MicroApp Settings";
+            this.Text = "MicroApp - Typing";
             ((System.ComponentModel.ISupportInitialize)(this.iconBox)).EndInit();
             this.headerBar.ResumeLayout(false);
             this.headerBar.PerformLayout();

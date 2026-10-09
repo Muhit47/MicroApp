@@ -77,7 +77,7 @@ runners do not have.
 | Path | What it is |
 |---|---|
 | `Program.cs` | Tray app: menu, hot keys, and the flow for each feature |
-| `SettingsForm.*` | Key Setting window |
+| `SettingsForm.*` | Typing Setting window |
 | `OcrSettingsForm.*` / `OcrService.cs` / `OcrResultForm.cs` | OCR settings, Windows OCR wrapper, result preview |
 | `CaptureSettingsForm.*` | Screen capture settings |
 | `GifSettingsForm.*` / `GifRecorder.cs` / `GifWriter.cs` | GIF settings, recorder, incremental GIF89a encoder |

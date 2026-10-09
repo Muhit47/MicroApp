@@ -119,7 +119,7 @@ Section "MicroApp (required)" SecApp
   File "${SRC}\System.Buffers.dll"
   File "${SRC}\System.Memory.dll"
   File "${SRC}\System.Numerics.Vectors.dll"
-  File "${SRC}\System.Resources.Extensions.dll"
+  File /nonfatal "${SRC}\System.Resources.Extensions.dll"
   File "${SRC}\System.Runtime.CompilerServices.Unsafe.dll"
   ; Remove Background: ONNX Runtime and the VC++ runtime it links (app-local)
   File "${SRC}\Microsoft.ML.OnnxRuntime.dll"

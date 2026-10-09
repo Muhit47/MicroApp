@@ -39,7 +39,7 @@ New Note
 Image Editor
 ────────────────
 Shortcuts
-Key Setting
+Typing Setting
 OCR Setting
 Capture Setting
 GIF Setting
@@ -79,7 +79,7 @@ VM/IPMI consoles that ignore Unicode input; those can only receive what their ow
 3. The pointer turns into a crosshair. Click the window you want it typed into.
 4. Press **Esc** at any time to stop typing.
 
-**Typing method** (Key Setting)
+**Typing method** (Typing Setting)
 
 | Method | Notes |
 |---|---|
@@ -698,7 +698,7 @@ preview; they are the same formats the note toolbar's date buttons use.
 
 ## Settings reference
 
-### Key Setting
+### Typing Setting
 
 | Setting | Default |
 |---|---|
@@ -888,7 +888,7 @@ settings window. Note that Windows itself reserves some combinations (for exampl
 those cannot be taken over by anything.
 
 **Typing skips or duplicates characters.**
-Raise *milliseconds between keystrokes* in Key Setting, and try the `SendInput` method. Remote desktops
+Raise *milliseconds between keystrokes* in Typing Setting, and try the `SendInput` method. Remote desktops
 and VM consoles usually need 15–30 ms.
 
 **Nothing is typed into an admin window.**

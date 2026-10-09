@@ -7,7 +7,7 @@ namespace MicroApp
 {
     /// <summary>
     /// Every hot key in one place. The rows edit the SAME settings the feature windows do
-    /// (Key/OCR/Capture/GIF/Video/Note Setting), so a change made here shows up there and a
+    /// (Typing/OCR/Capture/GIF/Video/Note Setting), so a change made here shows up there and a
     /// change made there shows up here - one value, two doors. Also home to the two typed-date
     /// hot keys and their formats (shared with the note toolbar's date buttons).
     /// </summary>
@@ -86,11 +86,7 @@ namespace MicroApp
             var card = new Card
             {
                 Location = new Point(24, 96),
-<<<<<<< HEAD
-                Size = new Size(CardW, 90 + (RowH * 11)),
-=======
-                Size = new Size(548, 92 + (RowH * 11)),
->>>>>>> aedeb4826494849d94158f8faa10a63d0533dfa0
+                Size = new Size(CardW, 90 + (RowH * 12)),
                 Title = "Hot keys",
                 Description = "Tick the modifiers and give each action a key."
             };
@@ -143,33 +139,19 @@ namespace MicroApp
                 BackColor = Color.Transparent
             });
 
-<<<<<<< HEAD
             int y = headY + 26;
             AddRow(card, y + RowH * 0, colLabel, colMods, colKey, colEnabled, colReset, "Paste as keystrokes", "HotKey", "HotKeyModifier", "HotKeyEnabled");
             AddRow(card, y + RowH * 1, colLabel, colMods, colKey, colEnabled, colReset, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier", "OcrHotKeyEnabled");
             AddRow(card, y + RowH * 2, colLabel, colMods, colKey, colEnabled, colReset, "Pick Text", "TextPickHotKey", "TextPickHotKeyModifier", "TextPickHotKeyEnabled");
             AddRow(card, y + RowH * 3, colLabel, colMods, colKey, colEnabled, colReset, "Pick color", "ColorPickHotKey", "ColorPickHotKeyModifier", "ColorPickHotKeyEnabled");
-            AddRow(card, y + RowH * 4, colLabel, colMods, colKey, colEnabled, colReset, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier", "CaptureHotKeyEnabled");
-            AddRow(card, y + RowH * 5, colLabel, colMods, colKey, colEnabled, colReset, "Record GIF", "GifHotKey", "GifHotKeyModifier", "GifHotKeyEnabled");
-            AddRow(card, y + RowH * 6, colLabel, colMods, colKey, colEnabled, colReset, "Record Video", "VideoHotKey", "VideoHotKeyModifier", "VideoHotKeyEnabled");
-            AddRow(card, y + RowH * 7, colLabel, colMods, colKey, colEnabled, colReset, "New note", "NoteHotKey", "NoteHotKeyModifier", "NoteHotKeyEnabled");
-            AddRow(card, y + RowH * 8, colLabel, colMods, colKey, colEnabled, colReset, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier", "ImageEditorHotKeyEnabled");
-            AddRow(card, y + RowH * 9, colLabel, colMods, colKey, colEnabled, colReset, "Type the date", "DateHotKey", "DateHotKeyModifier", "DateHotKeyEnabled");
-            AddRow(card, y + RowH * 10, colLabel, colMods, colKey, colEnabled, colReset, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier", "LongDateHotKeyEnabled");
-=======
-            int y = headY + 24;
-            AddRow(card, y + RowH * 0, colLabel, colMods, colKey, "Paste as keystrokes", "HotKey", "HotKeyModifier");
-            AddRow(card, y + RowH * 1, colLabel, colMods, colKey, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier");
-            AddRow(card, y + RowH * 2, colLabel, colMods, colKey, "Pick Text", "TextPickHotKey", "TextPickHotKeyModifier");
-            AddRow(card, y + RowH * 3, colLabel, colMods, colKey, "Always on top", "AotHotKey", "AotHotKeyModifier");
-            AddRow(card, y + RowH * 4, colLabel, colMods, colKey, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier");
-            AddRow(card, y + RowH * 5, colLabel, colMods, colKey, "Record GIF", "GifHotKey", "GifHotKeyModifier");
-            AddRow(card, y + RowH * 6, colLabel, colMods, colKey, "Record Video", "VideoHotKey", "VideoHotKeyModifier");
-            AddRow(card, y + RowH * 7, colLabel, colMods, colKey, "New note", "NoteHotKey", "NoteHotKeyModifier");
-            AddRow(card, y + RowH * 8, colLabel, colMods, colKey, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier");
-            AddRow(card, y + RowH * 9, colLabel, colMods, colKey, "Type the date", "DateHotKey", "DateHotKeyModifier");
-            AddRow(card, y + RowH * 10, colLabel, colMods, colKey, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier");
->>>>>>> aedeb4826494849d94158f8faa10a63d0533dfa0
+            AddRow(card, y + RowH * 4, colLabel, colMods, colKey, colEnabled, colReset, "Always on top", "AotHotKey", "AotHotKeyModifier", "AotHotKeyEnabled");
+            AddRow(card, y + RowH * 5, colLabel, colMods, colKey, colEnabled, colReset, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier", "CaptureHotKeyEnabled");
+            AddRow(card, y + RowH * 6, colLabel, colMods, colKey, colEnabled, colReset, "Record GIF", "GifHotKey", "GifHotKeyModifier", "GifHotKeyEnabled");
+            AddRow(card, y + RowH * 7, colLabel, colMods, colKey, colEnabled, colReset, "Record Video", "VideoHotKey", "VideoHotKeyModifier", "VideoHotKeyEnabled");
+            AddRow(card, y + RowH * 8, colLabel, colMods, colKey, colEnabled, colReset, "New note", "NoteHotKey", "NoteHotKeyModifier", "NoteHotKeyEnabled");
+            AddRow(card, y + RowH * 9, colLabel, colMods, colKey, colEnabled, colReset, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier", "ImageEditorHotKeyEnabled");
+            AddRow(card, y + RowH * 10, colLabel, colMods, colKey, colEnabled, colReset, "Type the date", "DateHotKey", "DateHotKeyModifier", "DateHotKeyEnabled");
+            AddRow(card, y + RowH * 11, colLabel, colMods, colKey, colEnabled, colReset, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier", "LongDateHotKeyEnabled");
 
             // ----- date formats card --------------------------------------------------
             var dates = new Card

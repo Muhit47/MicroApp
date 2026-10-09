@@ -4,3 +4,6 @@
 /Setup/obj
 /Setup/nsis/*.exe
 /Setup/nsis/*.zip
+/dist*/
+/bin/PortableStaging
+

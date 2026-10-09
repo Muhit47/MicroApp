@@ -16,7 +16,7 @@ A small Windows tray tool that does a handful of things well:
 
 Everything runs offline. No account, no service, no telemetry. Text recognition uses the OCR engine built into Windows 10/11. The parts that can go online all live in Notes and are yours to enable: the AI buttons (Grammar, Ask AI, Bangla→English), which call the provider you configured with your own key when you click them; Bangla phonetic typing, which looks words up in the [string.bd](https://string.bd) dictionary with your own token; and note sync, which talks to a Firebase project created under your own Google account. There is no MicroApp server anywhere in that picture — nothing is hosted by this project, and your notes never pass through anyone else's account. The full privacy policy is in **[PRIVACY.md](PRIVACY.md)**.
 
-![Key Setting](docs/key-setting.png)
+![Typing Setting](docs/key-setting.png)
 
 ---
 
@@ -59,7 +59,7 @@ Three typing engines, because no single one works everywhere:
 | `AutoIt Send` | Odd keyboard layouts, some legacy apps. |
 | `SendInput` (default) | VM consoles, remote desktops, anything that ignores the other two. |
 
-Delays, a confirmation threshold for long pastes, and the hot key all live in **Key Setting**.
+Delays, a confirmation threshold for long pastes, and the hot key all live in **Typing Setting**.
 
 ### 2. Grab text (OCR)
 
@@ -258,7 +258,7 @@ Seven focused windows, all reachable from the tray menu:
 
 | Window | Covers |
 |---|---|
-| **Key Setting** | Typing method, delays, confirmation threshold, typing hot key |
+| **Typing Setting** | Typing method, delays, confirmation threshold, typing hot key |
 | **OCR Setting** | OCR + Pick Text hot keys, recognizer language, what happens to the text |
 | **Capture Setting** | Screen capture hot key, selection lock, image output + folder |
 | **GIF Setting** | GIF hot key, fps and length, selection lock, GIF output + folder |
