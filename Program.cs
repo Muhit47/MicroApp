@@ -82,6 +82,8 @@ namespace MicroApp
 
     static class Program
     {
+        private static Mutex _appMutex;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -92,7 +94,7 @@ namespace MicroApp
             //https://stackoverflow.com/questions/502303/how-do-i-programmatically-get-the-guid-of-an-application-in-net2-0/502323#502323
             string assyGuid = Assembly.GetExecutingAssembly().GetCustomAttribute<GuidAttribute>().Value.ToUpper();
             bool createdNew;
-            new System.Threading.Mutex(false, assyGuid, out createdNew);
+            _appMutex = new System.Threading.Mutex(false, assyGuid, out createdNew);
             if (!createdNew) return;
 
             // settings live in a per-version folder, so a new build starts out blank

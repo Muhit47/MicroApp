@@ -10,6 +10,8 @@ A small Windows tray tool that does a handful of things well:
 - **Captures a screen region as a PNG**, with an optional locked ratio or locked pixel size.
 - **Records a screen region as an animated GIF.**
 - **Records a screen region as an MP4 video with sound** (system, microphone, or both), no time limit, with pause/resume and live follow-the-pointer and zoom.
+- **Screen Color Picker** — 11x11 real-time loupe magnifier, instant hex copy, and color inspector dialog with history palette (**Ctrl+Alt+C**).
+- **Productivity Shortcuts Cheat Sheet Hub** — searchable offline cheat sheet for 145+ Windows, Word, Excel, and PowerPoint shortcuts.
 - **An image editor** — paste a screenshot, crop it, draw arrows and boxes, add styled text, blur the private parts, stamp logos from a reusable asset library, **remove a photo's background with one click** (offline AI) — all as Photoshop-style layers in **document tabs**, exported as one PNG/JPG or **printed** with a Photoshop-style preview.
 - **Quick notes** — a hot key opens a fresh scratch-pad note that saves itself as you type, with spell check, **Bangla phonetic typing**, an **archive** for the ones you are done with, and an AI that fixes grammar or rewrites the note on request.
 - **Optionally, the same notes on every PC** — mirrored through a free database **you** own, set up by a wizard. Off until you turn it on.
@@ -22,12 +24,12 @@ Everything runs offline. No account, no service, no telemetry. Text recognition 
 
 ## Install
 
-**Installer** — download `MicroApp-5.2.0-setup.exe` from the
+**Installer** — download `MicroApp-5.4.1-setup.exe` from the
 [latest release](https://github.com/Mahi-BD/MicroApp/releases/latest) and run it. The last page asks
 whether MicroApp should **run when Windows starts**; tick it and it will. There is also a
 `-peruser-setup.exe` that installs into your profile and needs no administrator rights.
 
-**Portable** — or take `MicroApp-5.2.0-win-x64.zip`, unzip it anywhere and run `MicroApp.exe`. Nothing
+**Portable** — or take `MicroApp-5.4.1-win-x64.zip`, unzip it anywhere and run `MicroApp.exe`. Nothing
 is written outside your settings file.
 
 Step-by-step instructions, silent-install switches, first-run setup for the AI and Bangla keys,
@@ -289,6 +291,7 @@ installing and first-run setup are in **[SETUP.md](SETUP.md)**.
 | Record GIF | `Ctrl + Alt + G` |
 | Record Video | `Ctrl + Alt + R` |
 | New note | `Ctrl + Shift + N` |
+| Pick color | `Ctrl + Alt + C` |
 | Image editor | `Ctrl + Alt + E` |
 | Type the date | `Ctrl + Shift + D` |
 | Type the long date | `Ctrl + Shift + M` |

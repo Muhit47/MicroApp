@@ -1,7 +1,7 @@
 # MicroApp — Help
 
 Everything MicroApp does, with every setting and the things that commonly go wrong.
-Version 5.3.3.
+Version 5.4.1.
 
 - [Getting started](#getting-started)
 - [Paste as keystrokes](#paste-as-keystrokes)
@@ -12,6 +12,9 @@ Version 5.3.3.
 - [Record GIF](#record-gif)
 - [Record Video](#record-video)
 - [Notes](#notes)
+- [Image Editor](#image-editor)
+- [Screen Color Picker](#screen-color-picker)
+- [Shortcuts Cheat Sheet](#shortcuts-cheat-sheet)
 - [Settings reference](#settings-reference)
 - [Where files go](#where-files-go)
 - [Troubleshooting](#troubleshooting)
@@ -678,6 +681,40 @@ also fill it straight from Explorer.
 - **File → Save As** (**Ctrl+S**) - PNG keeps transparency, JPG (over white) for mail, BMP or TIFF.
 - **Shift+Ctrl+C** (Copy Merged) - puts the flattened result, or just the selected part of it,
   straight back on the clipboard.
+
+---
+
+## Screen Color Picker
+
+Press **Ctrl+Alt+C**, or tray → **Color Picker**.
+
+An 11×11 magnifier loupe opens around the pointer and follows it as you move, so you can zero in on
+exactly the pixel you want. **Click** anywhere to copy that pixel's HEX color straight to the
+clipboard, and a toast confirms the value was copied.
+
+Clicking also opens the **Color Inspector** dialog, which shows the same color as HEX, RGB and HSL,
+along with a swatches grid and a recent history palette of the last 10 picked colors. Click any swatch
+to copy its HEX to the clipboard.
+
+---
+
+## Shortcuts Cheat Sheet
+
+Tray → **Shortcuts Cheat Sheet** opens `SystemShortcutsForm` — a searchable offline reference of
+productivity keyboard shortcuts.
+
+It has four tabs:
+
+| Tab | Covers |
+|---|---|
+| **Windows** | Essential Windows shortcuts |
+| **Word** | Microsoft Word shortcuts |
+| **Excel** | Microsoft Excel shortcuts |
+| **PowerPoint** | Microsoft PowerPoint shortcuts |
+
+Each tab lists 145+ shortcuts in total across the four apps. Type into the **real-time search bar** to
+filter the list instantly as you type, so you can find the shortcut you need without scrolling through
+the whole list.
 
 ---
 

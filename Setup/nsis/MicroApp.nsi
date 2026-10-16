@@ -19,7 +19,7 @@ SetCompressor /SOLID lzma
 !include "x64.nsh"
 
 !ifndef VERSION
-  !define VERSION "4.2.2"
+  !define VERSION "5.4.1"
 !endif
 !ifndef SRC
   !define SRC "..\..\bin\Release"
@@ -27,7 +27,7 @@ SetCompressor /SOLID lzma
 
 !define APPNAME    "MicroApp"
 !define PUBLISHER  "Samsur Rahman Mahi"
-!define HOMEPAGE   "https://github.com/Mahi-BD/MicroApp"
+!define HOMEPAGE   "https://github.com/Muhit47/MicroApp"
 !define UNINSTKEY  "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
 
 ; Two flavours from one script:

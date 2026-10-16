@@ -162,8 +162,8 @@ namespace MicroApp
                 {
                     mods |= int.Parse(mod.Tag.ToString());
                 }
-                Properties.Settings.Default.HotKeyModifier = mods;
             }
+            Properties.Settings.Default.HotKeyModifier = mods;
             foreach(var mode in _hotKeyModes)
             {
                 if (mode.Checked)
