@@ -153,13 +153,19 @@
       <Value Profile="(Default)">20</Value>
     </Setting>
     <Setting Name="VideoSeconds" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">300</Value>
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="VideoQuality" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="VideoAudioSource" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="VideoMicDeviceId" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="VideoMicGain" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="VideoLockCursorSize" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

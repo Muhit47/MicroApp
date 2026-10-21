@@ -38,12 +38,24 @@ namespace MicroApp
             this.fpsHost = new FieldHost();
             this.videoFps = new TextBox();
             this.fpsLabel = new Label();
+            this.lengthHost = new FieldHost();
+            this.videoLength = new TextBox();
+            this.lengthLabel = new Label();
+            this.unlimitedCheck = new ModernCheckBox();
             this.qualityHost = new FieldHost();
             this.qualityBox = new ComboBox();
             this.qualityLabel = new Label();
             this.soundHost = new FieldHost();
             this.soundBox = new ComboBox();
             this.soundLabel = new Label();
+            this.micLabel = new Label();
+            this.micHost = new FieldHost();
+            this.micBox = new ComboBox();
+            this.levelLabel = new Label();
+            this.micMeter = new LevelMeter();
+            this.gainCaption = new Label();
+            this.gainSlider = new TrackBar();
+            this.gainLabel = new Label();
 
             this.cardLock = new Card();
             this.lockRatio = new ModernCheckBox();
@@ -89,7 +101,7 @@ namespace MicroApp
             this.headerBar.Controls.Add(this.subtitleLabel);
             this.headerBar.Dock = DockStyle.Top;
             this.headerBar.Name = "headerBar";
-            this.headerBar.Size = new Size(640, 84);
+            this.headerBar.Size = new Size(1256, 84);
             this.headerBar.TabStop = false;
             //
             // iconBox
@@ -128,13 +140,23 @@ namespace MicroApp
             this.cardRecording.Controls.Add(this.Video_Windows);
             this.cardRecording.Controls.Add(this.fpsHost);
             this.cardRecording.Controls.Add(this.fpsLabel);
+            this.cardRecording.Controls.Add(this.lengthHost);
+            this.cardRecording.Controls.Add(this.lengthLabel);
+            this.cardRecording.Controls.Add(this.unlimitedCheck);
             this.cardRecording.Controls.Add(this.qualityHost);
             this.cardRecording.Controls.Add(this.qualityLabel);
             this.cardRecording.Controls.Add(this.soundHost);
             this.cardRecording.Controls.Add(this.soundLabel);
+            this.cardRecording.Controls.Add(this.micLabel);
+            this.cardRecording.Controls.Add(this.micHost);
+            this.cardRecording.Controls.Add(this.levelLabel);
+            this.cardRecording.Controls.Add(this.micMeter);
+            this.cardRecording.Controls.Add(this.gainCaption);
+            this.cardRecording.Controls.Add(this.gainSlider);
+            this.cardRecording.Controls.Add(this.gainLabel);
             this.cardRecording.Location = new Point(24, 104);
             this.cardRecording.Name = "cardRecording";
-            this.cardRecording.Size = new Size(592, 188);
+            this.cardRecording.Size = new Size(592, 272);
             this.cardRecording.TabIndex = 1;
             this.cardRecording.Title = "Recording";
             this.cardRecording.Description = "Hot key, size and sound";
@@ -225,7 +247,37 @@ namespace MicroApp
             this.fpsLabel.AutoSize = true;
             this.fpsLabel.Location = new Point(110, 113);
             this.fpsLabel.Name = "fpsLabel";
-            this.fpsLabel.Text = "frames per second (1-30) — recording runs until you save it";
+            this.fpsLabel.Text = "frames per second (1-30)";
+            //
+            // lengthHost
+            //
+            this.lengthHost.Controls.Add(this.videoLength);
+            this.lengthHost.Location = new Point(398, 104);
+            this.lengthHost.Name = "lengthHost";
+            this.lengthHost.Size = new Size(64, 32);
+            this.lengthHost.TabIndex = 6;
+            //
+            // videoLength
+            //
+            this.videoLength.Location = new Point(10, 8);
+            this.videoLength.Name = "videoLength";
+            this.videoLength.Size = new Size(44, 16);
+            this.videoLength.TabIndex = 0;
+            //
+            // unlimitedCheck
+            //
+            this.unlimitedCheck.Location = new Point(300, 107);
+            this.unlimitedCheck.Name = "unlimitedCheck";
+            this.unlimitedCheck.Size = new Size(96, 24);
+            this.unlimitedCheck.TabIndex = 5;
+            this.unlimitedCheck.Text = "Unlimited";
+            //
+            // lengthLabel
+            //
+            this.lengthLabel.AutoSize = true;
+            this.lengthLabel.Location = new Point(466, 113);
+            this.lengthLabel.Name = "lengthLabel";
+            this.lengthLabel.Text = "sec. max";
             //
             // qualityHost
             //
@@ -271,6 +323,72 @@ namespace MicroApp
             this.soundLabel.Name = "soundLabel";
             this.soundLabel.Text = "sound";
             //
+            // micLabel
+            //
+            this.micLabel.AutoSize = true;
+            this.micLabel.Location = new Point(16, 195);
+            this.micLabel.Name = "micLabel";
+            this.micLabel.Text = "microphone";
+            //
+            // micHost
+            //
+            this.micHost.Controls.Add(this.micBox);
+            this.micHost.Location = new Point(100, 188);
+            this.micHost.Name = "micHost";
+            this.micHost.Size = new Size(210, 32);
+            this.micHost.TabIndex = 9;
+            //
+            // micBox
+            //
+            this.micBox.Location = new Point(10, 6);
+            this.micBox.Name = "micBox";
+            this.micBox.Size = new Size(190, 21);
+            this.micBox.TabIndex = 0;
+            //
+            // levelLabel
+            //
+            this.levelLabel.AutoSize = true;
+            this.levelLabel.Location = new Point(322, 195);
+            this.levelLabel.Name = "levelLabel";
+            this.levelLabel.Text = "level";
+            //
+            // micMeter
+            //
+            this.micMeter.Location = new Point(362, 192);
+            this.micMeter.Name = "micMeter";
+            this.micMeter.Size = new Size(212, 18);
+            this.micMeter.TabIndex = 10;
+            //
+            // gainCaption
+            //
+            this.gainCaption.AutoSize = true;
+            this.gainCaption.Location = new Point(16, 233);
+            this.gainCaption.Name = "gainCaption";
+            this.gainCaption.Text = "gain";
+            //
+            // gainSlider
+            //
+            this.gainSlider.AutoSize = false;
+            this.gainSlider.Location = new Point(90, 226);
+            this.gainSlider.Name = "gainSlider";
+            this.gainSlider.Size = new Size(250, 30);
+            this.gainSlider.Minimum = 0;
+            this.gainSlider.Maximum = 200;
+            this.gainSlider.TickFrequency = 50;
+            this.gainSlider.TickStyle = TickStyle.BottomRight;
+            this.gainSlider.SmallChange = 5;
+            this.gainSlider.LargeChange = 25;
+            this.gainSlider.Value = 100;
+            this.gainSlider.TabIndex = 11;
+            this.gainSlider.Scroll += new System.EventHandler(this.GainSlider_Scroll);
+            //
+            // gainLabel
+            //
+            this.gainLabel.AutoSize = true;
+            this.gainLabel.Location = new Point(350, 233);
+            this.gainLabel.Name = "gainLabel";
+            this.gainLabel.Text = "100%  (100% = no change, up to 200% boost)";
+            //
             // cardLock
             //
             this.cardLock.Controls.Add(this.lockRatio);
@@ -281,7 +399,7 @@ namespace MicroApp
             this.cardLock.Controls.Add(this.pixelHeightHost);
             this.cardLock.Controls.Add(this.pxLabel);
             this.cardLock.Controls.Add(this.lockNote);
-            this.cardLock.Location = new Point(24, 300);
+            this.cardLock.Location = new Point(24, 384);
             this.cardLock.Name = "cardLock";
             this.cardLock.Size = new Size(592, 144);
             this.cardLock.TabIndex = 2;
@@ -377,7 +495,7 @@ namespace MicroApp
             this.cardLive.Controls.Add(this.lockCursorSize);
             this.cardLive.Controls.Add(this.clickGlow);
             this.cardLive.Controls.Add(this.actionLog);
-            this.cardLive.Location = new Point(24, 452);
+            this.cardLive.Location = new Point(640, 104);
             this.cardLive.Name = "cardLive";
             this.cardLive.Size = new Size(592, 140);
             this.cardLive.TabIndex = 3;
@@ -415,7 +533,7 @@ namespace MicroApp
             this.cardOutput.Controls.Add(this.outputOpen);
             this.cardOutput.Controls.Add(this.folderHost);
             this.cardOutput.Controls.Add(this.browseButton);
-            this.cardOutput.Location = new Point(24, 600);
+            this.cardOutput.Location = new Point(640, 252);
             this.cardOutput.Name = "cardOutput";
             this.cardOutput.Size = new Size(592, 108);
             this.cardOutput.TabIndex = 4;
@@ -479,7 +597,7 @@ namespace MicroApp
             // cancelButton
             //
             this.cancelButton.DialogResult = DialogResult.Cancel;
-            this.cancelButton.Location = new Point(436, 712);
+            this.cancelButton.Location = new Point(1044, 544);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new Size(88, 36);
             this.cancelButton.TabIndex = 5;
@@ -489,7 +607,7 @@ namespace MicroApp
             //
             this.saveButton.Accent = true;
             this.saveButton.DialogResult = DialogResult.OK;
-            this.saveButton.Location = new Point(536, 712);
+            this.saveButton.Location = new Point(1144, 544);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new Size(80, 36);
             this.saveButton.TabIndex = 6;
@@ -502,7 +620,7 @@ namespace MicroApp
             this.CancelButton = this.cancelButton;
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(640, 760);
+            this.ClientSize = new Size(1256, 600);
             this.Controls.Add(this.cardRecording);
             this.Controls.Add(this.cardLock);
             this.Controls.Add(this.cardLive);
@@ -551,12 +669,24 @@ namespace MicroApp
         private FieldHost fpsHost;
         private TextBox videoFps;
         private Label fpsLabel;
+        private FieldHost lengthHost;
+        private TextBox videoLength;
+        private Label lengthLabel;
+        private ModernCheckBox unlimitedCheck;
         private FieldHost qualityHost;
         private ComboBox qualityBox;
         private Label qualityLabel;
         private FieldHost soundHost;
         private ComboBox soundBox;
         private Label soundLabel;
+        private Label micLabel;
+        private FieldHost micHost;
+        private ComboBox micBox;
+        private Label levelLabel;
+        private LevelMeter micMeter;
+        private Label gainCaption;
+        private TrackBar gainSlider;
+        private Label gainLabel;
 
         private Card cardLive;
         private ModernCheckBox lockCursorSize;

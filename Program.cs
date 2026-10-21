@@ -358,7 +358,7 @@ namespace MicroApp
             video.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.VideoHotKey, Properties.Settings.Default.VideoHotKeyModifier);
             note.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.NoteHotKey, Properties.Settings.Default.NoteHotKeyModifier);
             editor.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ImageEditorHotKey, Properties.Settings.Default.ImageEditorHotKeyModifier);
-            var shortcuts = new ToolStripMenuItem("Shortcuts", null, Shortcuts) { Padding = new Padding(4, 3, 4, 3) };
+            var shortcuts = new ToolStripMenuItem("Shortcuts Settings", null, Shortcuts) { Padding = new Padding(4, 3, 4, 3) };
             var systemShortcuts = new ToolStripMenuItem("Shortcuts Cheat Sheet", null, SystemShortcuts) { Padding = new Padding(4, 3, 4, 3) };
             var keySettings = new ToolStripMenuItem("Typing Setting", null, Settings) { Padding = new Padding(4, 3, 4, 3) };
             var ocrSettings = new ToolStripMenuItem("OCR Setting", null, OcrSettings) { Padding = new Padding(4, 3, 4, 3) };
@@ -1388,8 +1388,8 @@ namespace MicroApp
 
             try
             {
-                // no time limit: the recording runs until it is saved or Esc is pressed
-                _videoRecorder = new VideoRecorder(region, path, fps, 0,
+                // VideoSeconds is 0 for "unlimited" (runs until saved or Esc), otherwise a hard limit
+                _videoRecorder = new VideoRecorder(region, path, fps, Properties.Settings.Default.VideoSeconds,
                     (VideoQuality)Properties.Settings.Default.VideoQuality,
                     (VideoAudioSource)Properties.Settings.Default.VideoAudioSource);
             }

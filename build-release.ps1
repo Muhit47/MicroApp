@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "5.4.1"
+    [string]$Version = "5.5.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -105,19 +105,24 @@ Remove-Item $staging -Recurse -Force
 
 # Create / Copy RELEASE description
 $relDoc = @"
-# MicroApp $Version — Typing Settings & Unified Always on Top Shortcut
+# MicroApp $Version — Audio & Video Enhancements, Screen Color Picker, and Shortcuts Hub
 
-Improvements to Typing settings and unified Always on Top shortcut management.
+Major release combining comprehensive Audio & Video recording upgrades with productivity enhancements and utility tools.
 
-## Added
+## Highlights in $Version
 
-* **Unified Always on Top shortcut toggle:** "Always on top" is now integrated into the unified Shortcuts settings window with its own On/Off toggle switch and reset button.
+### Audio & Video Enhancements
+* **Microphone Selector & Real-Time Level Meter:** Select from any connected microphone device with live audio level feedback.
+* **0–200% Digital Gain Control:** Boost quiet audio inputs or adjust level with precise digital gain scaling.
+* **Two-Column Video Settings:** Compact two-column layout keeps Save and Cancel actions permanently accessible.
+* **Unlimited Video Duration:** Dedicated toggle checkbox for unlimited recording alongside customizable caps (1–3600 seconds).
+* **Multi-Monitor Capture Fix:** Screen capture coordinates properly across disparate monitor setups without grey bars.
 
-## Changed
-
-* **Typing Setting:** Renamed "Key Setting" to "Typing Setting" across the tray menu, settings dialogs, and documentation to more clearly describe its purpose.
-
-Everything new in 5.4.0 (Screen Color Picker with Loupe & Inspector, Productivity Shortcuts Cheat Sheet Hub) is included.
+### Productivity & Utilities
+* **Screen Color Picker:** Inspect pixels with an 11×11 loupe, single-click HEX copy, and detailed color analysis dialog.
+* **Productivity Shortcuts Cheat Sheet Hub:** 145 essential shortcuts categorized for Windows, Word, Excel, and PowerPoint with instant search.
+* **Shortcuts Settings:** Unified hotkey settings with dedicated On/Off toggle switches and reset options.
+* **Typing Settings:** Clearer labeling for paste simulation and delay settings.
 
 ## Installing
 

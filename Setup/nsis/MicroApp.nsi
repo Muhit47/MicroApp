@@ -19,7 +19,7 @@ SetCompressor /SOLID lzma
 !include "x64.nsh"
 
 !ifndef VERSION
-  !define VERSION "5.4.1"
+  !define VERSION "5.5.0"
 !endif
 !ifndef SRC
   !define SRC "..\..\bin\Release"

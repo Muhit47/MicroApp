@@ -36,7 +36,7 @@ namespace MicroApp
         {
             Theme.Init(ThemeHelper.IsDarkMode);
 
-            Text = "MicroApp - Shortcuts";
+            Text = "MicroApp - Shortcuts Settings";
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -62,7 +62,7 @@ namespace MicroApp
             {
                 Location = new Point(84, 24),
                 AutoSize = true,
-                Text = "Shortcuts",
+                Text = "Shortcuts Settings",
                 Font = new Font("Segoe UI Semibold", 12.5F),
                 ForeColor = Theme.Text,
                 BackColor = Color.Transparent
