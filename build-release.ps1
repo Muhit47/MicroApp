@@ -105,7 +105,7 @@ Remove-Item $staging -Recurse -Force
 
 # Create / Copy RELEASE description
 $relDoc = @"
-# MicroApp $Version — Audio & Video Enhancements, Screen Color Picker, and Shortcuts Hub
+# MicroApp $Version - Audio & Video Enhancements, Screen Color Picker, and Shortcuts Hub
 
 Major release combining comprehensive Audio & Video recording upgrades with productivity enhancements and utility tools.
 
@@ -113,13 +113,13 @@ Major release combining comprehensive Audio & Video recording upgrades with prod
 
 ### Audio & Video Enhancements
 * **Microphone Selector & Real-Time Level Meter:** Select from any connected microphone device with live audio level feedback.
-* **0–200% Digital Gain Control:** Boost quiet audio inputs or adjust level with precise digital gain scaling.
+* **0-200% Digital Gain Control:** Boost quiet audio inputs or adjust level with precise digital gain scaling.
 * **Two-Column Video Settings:** Compact two-column layout keeps Save and Cancel actions permanently accessible.
-* **Unlimited Video Duration:** Dedicated toggle checkbox for unlimited recording alongside customizable caps (1–3600 seconds).
+* **Unlimited Video Duration:** Dedicated toggle checkbox for unlimited recording alongside customizable caps (1-3600 seconds).
 * **Multi-Monitor Capture Fix:** Screen capture coordinates properly across disparate monitor setups without grey bars.
 
 ### Productivity & Utilities
-* **Screen Color Picker:** Inspect pixels with an 11×11 loupe, single-click HEX copy, and detailed color analysis dialog.
+* **Screen Color Picker:** Inspect pixels with an 11x11 loupe, single-click HEX copy, and detailed color analysis dialog.
 * **Productivity Shortcuts Cheat Sheet Hub:** 145 essential shortcuts categorized for Windows, Word, Excel, and PowerPoint with instant search.
 * **Shortcuts Settings:** Unified hotkey settings with dedicated On/Off toggle switches and reset options.
 * **Typing Settings:** Clearer labeling for paste simulation and delay settings.
