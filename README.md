@@ -1,6 +1,6 @@
 # MicroApp
 
-**[microapp website](https://mahi-bd.github.io/MicroApp/)** · **[download](https://github.com/Muhit47/MicroApp/releases/latest)** · [changelog](CHANGELOG.md) · [manual](HELP.md)
+**[microapp website](https://muhit47.github.io/MicroApp/)** · **[download](https://github.com/Muhit47/MicroApp/releases/latest)** · [changelog](CHANGELOG.md) · [manual](HELP.md)
 
 A small Windows tray tool that does a handful of things well:
 
@@ -9,9 +9,10 @@ A small Windows tray tool that does a handful of things well:
 - **Picks the exact text of any control** — like a colour picker, but for text (UI Automation, no OCR).
 - **Captures a screen region as a PNG**, with an optional locked ratio or locked pixel size.
 - **Records a screen region as an animated GIF.**
-- **Records a screen region as an MP4 video with sound** (system, microphone picker with live level meter and 0-200% gain, or both mixed), customizable or unlimited length, pause/resume, live pointer-follow and zoom.
-- **Screen Color Picker** — 11x11 real-time loupe magnifier, instant hex copy, and color inspector dialog with history palette (**Ctrl+Alt+C**).
-- **Productivity Shortcuts Cheat Sheet Hub** — searchable offline cheat sheet for 145+ Windows, Word, Excel, and PowerPoint shortcuts.
+- **Records a screen region as an MP4 video with sound** (system, microphone picker with live level meter and 0-200% gain, or both mixed), customizable length or unlimited duration, 2-column layout, pause/resume, live pointer-follow and zoom.
+- **Screen Color Picker** — 11x11 real-time loupe magnifier, instant HEX copy, and color inspector dialog with recent history palette (**Ctrl+Alt+C**).
+- **Productivity Shortcuts Cheat Sheet Hub** — searchable offline reference hub with 145+ categorized shortcuts across Windows, Word, Excel, and PowerPoint.
+- **Shortcuts Settings** — unified hotkey management hub with individual On/Off toggle switches, reset options, and Always on Top integration.
 - **An image editor** — paste a screenshot, crop it, draw arrows and boxes, add styled text, blur the private parts, stamp logos from a reusable asset library, **remove a photo's background with one click** (offline AI) — all as Photoshop-style layers in **document tabs**, exported as one PNG/JPG or **printed** with a Photoshop-style preview.
 - **Quick notes** — a hot key opens a fresh scratch-pad note that saves itself as you type, with spell check, **Bangla phonetic typing**, an **archive** for the ones you are done with, and an AI that fixes grammar or rewrites the note on request.
 - **Optionally, the same notes on every PC** — mirrored through a free database **you** own, set up by a wizard. Off until you turn it on.
@@ -319,9 +320,10 @@ msbuild MicroApp.sln /p:Configuration=Release /p:SkipCodeSigning=true
 
 ---
 
-## Author
+## Author & Maintainers
 
-**Samsur Rahman Mahi** — [mahi@rampsbd.com](mailto:mahi@rampsbd.com)
+- **Samsur Rahman Mahi** — [mahi@rampsbd.com](mailto:mahi@rampsbd.com) (Original Author)
+- **Muhit** — [@Muhit47](https://github.com/Muhit47)
 
 ## License and attribution
 
