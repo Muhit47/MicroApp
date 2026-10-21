@@ -1,6 +1,6 @@
 # MicroApp
 
-**[microapp website](https://mahi-bd.github.io/MicroApp/)** · **[download](https://github.com/Mahi-BD/MicroApp/releases/latest)** · [changelog](CHANGELOG.md) · [manual](HELP.md)
+**[microapp website](https://mahi-bd.github.io/MicroApp/)** · **[download](https://github.com/Muhit47/MicroApp/releases/latest)** · [changelog](CHANGELOG.md) · [manual](HELP.md)
 
 A small Windows tray tool that does a handful of things well:
 
@@ -9,7 +9,7 @@ A small Windows tray tool that does a handful of things well:
 - **Picks the exact text of any control** — like a colour picker, but for text (UI Automation, no OCR).
 - **Captures a screen region as a PNG**, with an optional locked ratio or locked pixel size.
 - **Records a screen region as an animated GIF.**
-- **Records a screen region as an MP4 video with sound** (system, microphone, or both), no time limit, with pause/resume and live follow-the-pointer and zoom.
+- **Records a screen region as an MP4 video with sound** (system, microphone picker with live level meter and 0-200% gain, or both mixed), customizable or unlimited length, pause/resume, live pointer-follow and zoom.
 - **Screen Color Picker** — 11x11 real-time loupe magnifier, instant hex copy, and color inspector dialog with history palette (**Ctrl+Alt+C**).
 - **Productivity Shortcuts Cheat Sheet Hub** — searchable offline cheat sheet for 145+ Windows, Word, Excel, and PowerPoint shortcuts.
 - **An image editor** — paste a screenshot, crop it, draw arrows and boxes, add styled text, blur the private parts, stamp logos from a reusable asset library, **remove a photo's background with one click** (offline AI) — all as Photoshop-style layers in **document tabs**, exported as one PNG/JPG or **printed** with a Photoshop-style preview.
@@ -25,7 +25,7 @@ Everything runs offline. No account, no service, no telemetry. Text recognition 
 ## Install
 
 **Installer** — download `MicroApp-5.5.0-setup.exe` from the
-[latest release](https://github.com/Mahi-BD/MicroApp/releases/latest) and run it. The last page asks
+[latest release](https://github.com/Muhit47/MicroApp/releases/latest) and run it. The last page asks
 whether MicroApp should **run when Windows starts**; tick it and it will. There is also a
 `-peruser-setup.exe` that installs into your profile and needs no administrator rights.
 
@@ -133,13 +133,12 @@ from screen capture.
 
 ### 7. Record Video
 
-Press **Ctrl+Alt+R** (or tray → *Record Video*), pick a region, and MicroApp records it as a small
-**MP4 (H.264 + AAC)** — with **sound** from the system, a microphone, or both mixed. A red frame marks
-the recorded area and a badge shows the time, with live controls: **follow the mouse pointer**, **zoom**
-50–400 % (the wheel works over the badge too), **mute the microphone**, **pause/resume** (paused stretches are
-simply absent from the file) and **save**. There is no time limit: it records until you save, press **Esc**,
-or press the hot key again. Encoding uses the codecs built into Windows; the video streams to disk while
-it records.
+Press **Ctrl+Alt+R** (or tray → *Record Video*), pick a region, and MicroApp records it as a compact
+**MP4 (H.264 + AAC)**:
+- **Audio Capture & Mic Picker:** Select any active recording device with a real-time **audio level meter** and **0–200% digital gain slider** (100% is neutral, higher boosts quiet mics).
+- **Duration Control:** Tick the **Unlimited** checkbox to record until manually stopped, or enter a hard cap (1–3600 seconds).
+- **Two-Column Settings:** Compact 2-column layout ensures Save and Cancel buttons are permanently visible on all display resolutions.
+- **Live Controls & Zoom:** A floating toolbar shows elapsed time, follow-pointer toggle, zoom 50–400% (or mouse wheel over badge), mic mute toggle, pause/resume, and instant save.
 
 ### 8. Notes
 
@@ -256,15 +255,16 @@ right-click menus (**Help → Keyboard Shortcuts** lists them all).
 
 ## Settings
 
-Seven focused windows, all reachable from the tray menu:
+Eight focused windows, all reachable from the tray menu:
 
 | Window | Covers |
 |---|---|
+| **Shortcuts Settings** | Centralized hotkey manager with individual On/Off toggles, reset buttons, Always on Top toggle |
 | **Typing Setting** | Typing method, delays, confirmation threshold, typing hot key |
 | **OCR Setting** | OCR + Pick Text hot keys, recognizer language, what happens to the text |
 | **Capture Setting** | Screen capture hot key, selection lock, image output + folder |
 | **GIF Setting** | GIF hot key, fps and length, selection lock, GIF output + folder |
-| **Video Setting** | Video hot key, fps, quality, sound source, selection lock, output folder |
+| **Video Setting** | Video hot key, fps, quality, sound source, mic selector, level meter, gain slider, max length / unlimited duration, selection lock, output folder |
 | **Note Setting** | Note hot key, taskbar behaviour, fixed-width text, date/time formats, AI provider + key, string.bd token, note sync |
 | **AOT Setting** | Always on Top hot key, opacity of pinned windows, title pin, notification/sound, unpin all |
 
@@ -303,7 +303,7 @@ installing and first-run setup are in **[SETUP.md](SETUP.md)**.
 Hot keys act the moment the combination is pressed — the crosshair appears while the keys are still held.
 
 Global hot keys win over the focused app, so if one collides with something you use, change it — every
-hot key is editable in its settings window, or all of them together under tray → **Shortcuts**, and
+hot key is editable in its settings window, or all of them together under tray → **Shortcuts Settings**, and
 clearing the key box disables that hot key entirely. **Ctrl+Shift+D / Ctrl+Shift+M** type the current
 date (short / long form) into the focused window; their formats live on the Shortcuts window too.
 

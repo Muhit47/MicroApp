@@ -23,7 +23,7 @@ Optional, only if you want them:
 
 ## Pick a download
 
-All three are on the [latest release](https://github.com/Mahi-BD/MicroApp/releases/latest) page.
+All three are on the [latest release](https://github.com/Muhit47/MicroApp/releases/latest) page.
 
 | Download | Installs to | Needs admin | Use it when |
 |---|---|---|---|
@@ -127,7 +127,7 @@ per-user). It replaces the files in place; **your settings, hot keys, keys and n
 the portable build, unzip the new version over the old folder.
 
 There is no auto-update and no update check. Watch the
-[releases page](https://github.com/Mahi-BD/MicroApp/releases) or the repository for new versions.
+[releases page](https://github.com/Muhit47/MicroApp/releases) or the repository for new versions.
 
 ---
 
