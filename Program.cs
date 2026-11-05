@@ -82,20 +82,32 @@ namespace MicroApp
 
     static class Program
     {
-        private static Mutex _appMutex;
+        /// <summary>Files named on the command line (a double-clicked .ma), opened once the tray app is up.</summary>
+        internal static string[] StartupFiles = new string[0];
+        internal static string AppGuid;
+        // held for the whole run: an unreferenced Mutex is garbage-collected (and released),
+        // after which a second MicroApp starts and finds every hot key "taken"
+        static System.Threading.Mutex _singleInstance;
 
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             // only run one of these at a time!
             //https://stackoverflow.com/questions/502303/how-do-i-programmatically-get-the-guid-of-an-application-in-net2-0/502323#502323
             string assyGuid = Assembly.GetExecutingAssembly().GetCustomAttribute<GuidAttribute>().Value.ToUpper();
             bool createdNew;
-            _appMutex = new System.Threading.Mutex(false, assyGuid, out createdNew);
-            if (!createdNew) return;
+            _singleInstance = new System.Threading.Mutex(false, assyGuid, out createdNew);
+            AppGuid = assyGuid;
+            StartupFiles = FileOpen.FilesFromArgs(args);
+            if (!createdNew)
+            {
+                // already running: hand a double-clicked file over to it
+                if (StartupFiles.Length > 0) FileOpen.SendToRunning(assyGuid, StartupFiles);
+                return;
+            }
 
             // settings live in a per-version folder, so a new build starts out blank
             // unless the previous version's are carried across on first run
@@ -133,6 +145,7 @@ namespace MicroApp
             Application.ThreadException += Application_ThreadException;
 
             Application.Run(new TrayApplicationContext());
+            GC.KeepAlive(_singleInstance);
 
         }
 
@@ -256,6 +269,8 @@ namespace MicroApp
 
         // text picker: "+" crosshair, click an element, get its real text (UI Automation, no OCR)
         int? _pickHotKey;
+        int? _colorHotKey;
+        EventHandler<HotKeyEventArgs> _colorHotKeyHandler;
         EventHandler<HotKeyEventArgs> _pickHotKeyHandler = null;
         IKeyboardMouseEvents _pickHook;
         TextPickerHud _pickHud;
@@ -263,12 +278,6 @@ namespace MicroApp
         System.Windows.Forms.Timer _pickTimer;
         bool _pickPeekBusy;
         IntPtr _pickTarget;
-
-        // color picker: loupe magnifier, pixel-accurate inspection, instant copy + inspector dialog
-        int? _colorPickHotKey;
-        EventHandler<HotKeyEventArgs> _colorPickHotKeyHandler = null;
-        IKeyboardMouseEvents _colorPickHook;
-        ColorLoupeForm _colorLoupe;
 
         // always on top: "+" crosshair, click a window to pin it above the others (or let it go)
         int? _aotHotKey;
@@ -323,6 +332,15 @@ namespace MicroApp
                 Text = "MicroApp: Click to choose a target"
             };
             _notify.MouseDown += _notify_MouseDown;
+
+            // .ma projects open in the image editor on a double-click in File Explorer
+            FileOpen.RegisterFileType();
+            FileOpen.Listen(Program.AppGuid, _sync, ImageEditorForm.OpenPaths);
+            if (Program.StartupFiles.Length > 0)
+            {
+                var files = Program.StartupFiles;
+                _sync.BeginInvoke(new Action(() => ImageEditorForm.OpenPaths(files)));
+            }
         }
 
         /// <summary>Tray menu, themed to match the rest of the app.</summary>
@@ -340,7 +358,8 @@ namespace MicroApp
 
             var grab = new ToolStripMenuItem("Grab text (OCR)", null, GrabText) { Padding = new Padding(4, 3, 4, 3) };
             var pick = new ToolStripMenuItem("Pick Text", null, PickText) { Padding = new Padding(4, 3, 4, 3) };
-            var pickColor = new ToolStripMenuItem("Pick Color", null, PickColor) { Padding = new Padding(4, 3, 4, 3) };
+            var color = new ToolStripMenuItem("Pick Color", null, PickColor) { Padding = new Padding(4, 3, 4, 3) };
+            color.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier);
             var aot = new ToolStripMenuItem("Always on Top", null, AlwaysOnTopPick) { Padding = new Padding(4, 3, 4, 3) };
             var capture = new ToolStripMenuItem("Screen Capture", null, ScreenCapture) { Padding = new Padding(4, 3, 4, 3) };
             var gif = new ToolStripMenuItem("Record GIF", null, RecordGif) { Padding = new Padding(4, 3, 4, 3) };
@@ -351,7 +370,6 @@ namespace MicroApp
             // each feature shows its current hot key, so the menu doubles as a cheat sheet
             grab.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.OcrHotKey, Properties.Settings.Default.OcrHotKeyModifier);
             pick.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.TextPickHotKey, Properties.Settings.Default.TextPickHotKeyModifier);
-            pickColor.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier);
             aot.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.AotHotKey, Properties.Settings.Default.AotHotKeyModifier);
             capture.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.CaptureHotKey, Properties.Settings.Default.CaptureHotKeyModifier);
             gif.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.GifHotKey, Properties.Settings.Default.GifHotKeyModifier);
@@ -367,11 +385,12 @@ namespace MicroApp
             var videoSettings = new ToolStripMenuItem("Video Setting", null, VideoSettings) { Padding = new Padding(4, 3, 4, 3) };
             var noteSettings = new ToolStripMenuItem("Note Setting", null, NoteSettings) { Padding = new Padding(4, 3, 4, 3) };
             var aotSettings = new ToolStripMenuItem("AOT Setting", null, AotSettings) { Padding = new Padding(4, 3, 4, 3) };
+            var colorSettings = new ToolStripMenuItem("Color Setting", null, ColorSettings) { Padding = new Padding(4, 3, 4, 3) };
             var about = new ToolStripMenuItem("About", null, About) { Padding = new Padding(4, 3, 4, 3) };
             var exit = new ToolStripMenuItem("Exit", null, Exit) { Padding = new Padding(4, 3, 4, 3) };
             menu.Items.Add(grab);
             menu.Items.Add(pick);
-            menu.Items.Add(pickColor);
+            menu.Items.Add(color);
             menu.Items.Add(aot);
             menu.Items.Add(capture);
             menu.Items.Add(gif);
@@ -388,6 +407,7 @@ namespace MicroApp
             menu.Items.Add(videoSettings);
             menu.Items.Add(noteSettings);
             menu.Items.Add(aotSettings);
+            menu.Items.Add(colorSettings);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(about);
             menu.Items.Add(exit);
@@ -663,6 +683,9 @@ namespace MicroApp
         /// </summary>
         /// <param name="what">Feature name for the dialog heading, e.g. "Typing".</param>
         /// <param name="takeOverSetting">Name of the setting holding the combination the user agreed to take over.</param>
+        /// <summary>"Yes to all" was chosen: take every other taken hot key this run without asking.</summary>
+        static bool _takeAllHotKeys;
+
         static int? RegisterOrTakeOver(string what, Keys key, KeyModifiers modifiers, string takeOverSetting)
         {
             int id, error;
@@ -675,17 +698,28 @@ namespace MicroApp
                 return null;
             }
 
-            bool alreadyAgreed = string.Equals((string)Properties.Settings.Default[takeOverSetting], combo, StringComparison.Ordinal);
+            // 0 = ask, 1 = always take it, 2 = always leave it ("Don't show this again")
+            int mode = Properties.Settings.Default.HotKeyTakeOverMode;
+            if (mode == 2) return null;
+            bool alreadyAgreed = mode == 1 || _takeAllHotKeys ||
+                string.Equals((string)Properties.Settings.Default[takeOverSetting], combo, StringComparison.Ordinal);
             if (!alreadyAgreed)
             {
-                bool takeIt = ModernDialog.Confirm(
+                bool dontAsk;
+                var answer = ModernDialog.ConfirmAll(
                     what + " hot key is taken",
                     combo + " is already registered by another application.\r\n\r\nUse it for MicroApp instead? MicroApp will see the key first, and the other app will stop receiving it.",
                     "Yes, use it here",
-                    "Leave it");
-                if (!takeIt) return null;
-                Properties.Settings.Default[takeOverSetting] = combo;
+                    "Yes to all",
+                    "Leave it",
+                    "Don't show this again",
+                    out dontAsk);
+                bool takeIt = answer != ModernDialog.Answer.No;
+                if (answer == ModernDialog.Answer.YesToAll) _takeAllHotKeys = true;
+                if (dontAsk) Properties.Settings.Default.HotKeyTakeOverMode = takeIt ? 1 : 2;
+                if (takeIt) Properties.Settings.Default[takeOverSetting] = combo;
                 Properties.Settings.Default.Save();
+                if (!takeIt) return null;
             }
 
             try
@@ -2002,19 +2036,20 @@ namespace MicroApp
             });
         }
 
+        // ============================================================ colour picker
+
         void StartColorPickHotKey()
         {
             StopColorPickHotKey();
-            if (!Properties.Settings.Default.ColorPickHotKeyEnabled) return;
             var letter = Properties.Settings.Default.ColorPickHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
             {
                 Keys key = (Keys)Enum.Parse(typeof(Keys), letter);
-                _colorPickHotKey = RegisterOrTakeOver("Color picker", key, (KeyModifiers)Properties.Settings.Default.ColorPickHotKeyModifier, "ColorPickHotKeyTakeOver");
-                if (!_colorPickHotKey.HasValue) return;
-                _colorPickHotKeyHandler = new EventHandler<HotKeyEventArgs>(HotKeyManager_ColorPickHotKeyPressed);
-                HotKeyManager.HotKeyPressed += _colorPickHotKeyHandler;
+                _colorHotKey = RegisterOrTakeOver("Color picker", key, (KeyModifiers)Properties.Settings.Default.ColorPickHotKeyModifier, "ColorPickHotKeyTakeOver");
+                if (!_colorHotKey.HasValue) return;
+                _colorHotKeyHandler = new EventHandler<HotKeyEventArgs>(HotKeyManager_ColorPickHotKeyPressed);
+                HotKeyManager.HotKeyPressed += _colorHotKeyHandler;
             }
             catch (Exception e)
             {
@@ -2024,149 +2059,52 @@ namespace MicroApp
 
         void StopColorPickHotKey()
         {
-            if (_colorPickHotKey.HasValue)
+            if (_colorHotKey.HasValue)
             {
-                HotKeyManager.HotKeyPressed -= _colorPickHotKeyHandler;
-                HotKeyManager.UnregisterHotKey(_colorPickHotKey.Value);
+                HotKeyManager.HotKeyPressed -= _colorHotKeyHandler;
+                HotKeyManager.UnregisterHotKey(_colorHotKey.Value);
             }
-            _colorPickHotKey = null;
-            _colorPickHotKeyHandler = null;
+            _colorHotKey = null;
+            _colorHotKeyHandler = null;
         }
 
         private void HotKeyManager_ColorPickHotKeyPressed(object sender, HotKeyEventArgs e)
         {
             if (!Matches(e, Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier)) return;
-
-            // pressing the hot key again while picking cancels it
-            if (_colorPickHook != null)
-            {
-                _sync.BeginInvoke(new Action(CancelColorPick));
-                return;
-            }
-            BeginColorPick();
+            // pressing it again while picking cancels
+            if (ColorPicker.Active) { _sync.BeginInvoke(new Action(ColorPicker.Cancel)); return; }
+            _sync.BeginInvoke(new Action(() => PickColor(null, EventArgs.Empty)));
         }
 
-        void PickColor(object sender, EventArgs e)
-        {
-            BeginColorPick();
-        }
-
-        void BeginColorPick()
+        void ColorSettings(object sender, EventArgs e)
         {
             if (_settingsOpen) return;
-            if (_sync.InvokeRequired) _sync.BeginInvoke(new Action(StartColorPick));
-            else StartColorPick();
-        }
-
-        void StartColorPick()
-        {
-            if (_ocrBusy || _colorPickHook != null || _pickHook != null || _recorder != null || _videoRecorder != null) return;
-
-            // change cursors to crosshair
-            uint[] cursors = { Native.NORMAL, Native.IBEAM, Native.HAND };
-            for (int i = 0; i < cursors.Length; i++)
-                Native.SetSystemCursor(Native.CopyIcon(Native.LoadCursor(IntPtr.Zero, (int)Native.CROSS)), cursors[i]);
-
-            // snapshot screen once for the loupe
-            var bounds = SystemInformation.VirtualScreen;
-            var bmp = new Bitmap(bounds.Width, bounds.Height);
-            using (var g = Graphics.FromImage(bmp))
-            {
-                g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
-            }
-
-            _colorLoupe = new ColorLoupeForm(bmp, bounds);
-            _colorLoupe.UpdateCursor(Cursor.Position);
-            _colorLoupe.Show();
-
-            _colorPickHook = Hook.GlobalEvents();
-            _colorPickHook.MouseMove += _colorPickHook_MouseMove;
-            _colorPickHook.MouseDownExt += _colorPickHook_MouseDownExt;
-            _colorPickHook.KeyDown += _colorPickHook_KeyDown;
-        }
-
-        private void _colorPickHook_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_colorLoupe != null && !_colorLoupe.IsDisposed)
-            {
-                _colorLoupe.UpdateCursor(e.Location);
-            }
-        }
-
-        private void _colorPickHook_MouseDownExt(object sender, MouseEventExtArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                e.Handled = true;
-                Color chosen = _colorLoupe != null ? _colorLoupe.CurrentColor : Color.Black;
-                string hex = _colorLoupe != null ? _colorLoupe.CurrentHex : ColorUtils.ToHex(chosen);
-                _sync.BeginInvoke(new Action(() => FinishColorPick(chosen, hex)));
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-                e.Handled = true;
-                _sync.BeginInvoke(new Action(CancelColorPick));
-            }
-        }
-
-        private void _colorPickHook_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-            {
-                e.Handled = true;
-                _sync.BeginInvoke(new Action(CancelColorPick));
-            }
-        }
-
-        void CancelColorPick()
-        {
-            EndColorPick();
-        }
-
-        void EndColorPick()
-        {
-            if (_colorPickHook != null)
-            {
-                _colorPickHook.MouseMove -= _colorPickHook_MouseMove;
-                _colorPickHook.MouseDownExt -= _colorPickHook_MouseDownExt;
-                _colorPickHook.KeyDown -= _colorPickHook_KeyDown;
-                _colorPickHook.Dispose();
-                _colorPickHook = null;
-            }
-            if (_colorLoupe != null)
-            {
-                _colorLoupe.Close();
-                _colorLoupe.Dispose();
-                _colorLoupe = null;
-            }
-            Native.SystemParametersInfo(0x0057, 0, null, 0); // restore real cursors
-        }
-
-        void FinishColorPick(Color color, string hex)
-        {
-            if (_colorPickHook == null && _colorLoupe == null) return;
-            EndColorPick();
-
-            if (SetClipboard(hex))
-            {
-                Toast.Show($"Copied {hex} to the clipboard.");
-            }
-            else
-            {
-                SystemSounds.Beep.Play();
-                ModernDialog.Info("Clipboard is busy", "Another app is holding the clipboard. Try again.");
-            }
-
-            ColorUtils.AddToHistory(hex);
-
             _settingsOpen = true;
             StopAllHotKeys();
-            using (var dlg = new ColorInspectorDialog(color))
-            {
-                dlg.ShowDialog();
-            }
+            var settings = new ColorPickSettingsForm();
+            settings.ShowDialog();
             _settingsOpen = false;
             StartAllHotKeys();
+            RefreshTrayMenu();
+        }
+
+        /// <summary>Tray → Pick Color: click any pixel on screen, its #RRGGBB goes to the clipboard.</summary>
+        void PickColor(object sender, EventArgs e)
+        {
+            if (_settingsOpen || ColorPicker.Active) return;
+            if (_ocrBusy || _pickHook != null || _recorder != null || _videoRecorder != null) return;
+            ColorPicker.Start(hex =>
+            {
+                if (SetClipboard(hex))
+                {
+                    Toast.Show(hex + " copied to the clipboard.");
+                }
+                else
+                {
+                    SystemSounds.Beep.Play();
+                    ModernDialog.Info("Clipboard is busy", "Another app is holding the clipboard. Try again.");
+                }
+            });
         }
 
         // ============================================================ always on top
@@ -2455,7 +2393,7 @@ namespace MicroApp
             if (_recorder != null) FinishGifRecording();
             if (_videoRecorder != null) FinishVideoRecording();
             EndTextPick();
-            EndColorPick();
+            ColorPicker.Cancel();
             EndAotPick();
             AlwaysOnTop.UnpinAll();   // give every window back as it was
             EndTrack();

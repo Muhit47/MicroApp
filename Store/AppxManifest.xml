@@ -9,7 +9,7 @@
   <Identity
     Name="RampsBD.MicroApp"
     Publisher="CN=8C8AE894-B66F-4CE1-9805-33D3F83BC5CF"
-    Version="5.5.0.0"
+    Version="5.6.1.0"
     ProcessorArchitecture="neutral" />
 
   <Properties>
@@ -36,6 +36,17 @@
         Square44x44Logo="Assets\Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
       </uap:VisualElements>
+      <Extensions>
+        <!-- double-click a .ma image editor project to open it -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="microappproject">
+            <uap:DisplayName>MicroApp Project</uap:DisplayName>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.ma</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

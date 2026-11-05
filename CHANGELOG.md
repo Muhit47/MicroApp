@@ -1,6 +1,81 @@
 # Changelog
 
-## 5.5.0 - 2026-10-22
+## 5.6.1 — 2026-11-05
+
+### Added
+
+- **Full Integration of Upstream v5.6.0 & v5.5.0:** MicroApp Project (.ma) files, multi-page editor documents, page-aware printing, and double-click file association.
+- **Pick Color & Palette History:** Magnified pixel loupe with instant `#RRGGBB` clipboard copy, plus RGB, HSL, and recent colors palette history.
+- **Productivity Shortcuts Hub:** Dedicated shortcuts hub with fast search, on/off toggles, and customizable hotkeys.
+
+## 5.6.0 — 2026-11-04
+
+### Added
+
+- **Pick Color** (tray menu). A **+** crosshair with a magnified loupe of the pixels under it, the live
+  `#RRGGBB` and RGB values; click any pixel and its hex code (e.g. `#6366F1`) is copied to the clipboard.
+  Right-click or **Esc** cancels.
+- **Color Setting** (tray menu) sets the Pick Color hot key — default **Ctrl+Alt+C**; it is also in *Shortcuts*.
+  Pressing the hot key again while picking cancels.
+- **Double-click a .ma project in File Explorer** and it opens in the image editor (in a tab of its own; a
+  running MicroApp takes the file over). MicroApp registers the `.ma` file type for the current user when it
+  starts; the Store package declares it in its manifest.
+- The **"hot key is taken"** question has **Yes to all** (take every other taken hot key without asking again
+  this run) and **Don't show this again** (remember the answer). *Shortcuts* has a switch to turn the question
+  back on.
+
+### Fixed
+
+- **MicroApp could run more than once.** The one-instance lock was released by the garbage collector after a
+  while, so a later start opened a second copy, which found all of its hot keys "taken" by the first and asked
+  about each one.
+
+## 5.5.0 — 2026-10-29
+
+### Added
+
+- **Image editor projects (.ma).** File → Save / Save As now offers **MicroApp Project (.ma)**, a single file
+  that keeps the whole document: every layer (image layers lossless, text and shapes still editable) with its
+  name, position, rotation, skew, flip, opacity, blend mode, lock/visibility and layer style, plus the canvas,
+  background, print resolution, selection, guides and ruler origin. File → Open and drag-and-drop open it in
+  its own tab exactly as it was saved. After the first save **Ctrl+S** saves straight back to the project
+  (Save As is now **Ctrl+Shift+S**). Saving and opening run behind a **progress bar** with the layer being
+  worked on. The file is written to a temporary copy first, so a failed save never damages the old one.
+- **Pages in the image editor.** A document can now hold several pages, each with its own canvas, layers,
+  selection and history. A **Pages panel** left of the canvas shows a thumbnail and the name of each page:
+  click to switch (the Layers panel follows), double-click to rename, drag to reorder, right-click for
+  Duplicate / Rename / Delete / Move; **+** adds a page and **«** hides the panel (it shows by itself once
+  a document has two pages; **Page → Show Pages Panel** brings it back). New **Page** menu with
+  **Ctrl+PageUp / Ctrl+PageDown** for the previous / next page. The status bar shows *page 2 of 5*.
+- **Print picks the pages.** On a multi-page document File → Print offers **All pages**, **Current page** or a
+  range like `1-3, 5`, a **Preview** box to look at any page on the sheet, and sends every chosen page in one
+  print job (one page rendered at a time, so long documents do not fill the memory).
+- .ma projects store every page; projects saved before pages existed still open.
+
+### Changed
+
+- **The editor is much lighter on big pictures.** Zoomed out, the picture is shrunk to the screen once per
+  change instead of on every repaint: on an A4 300 ppi document that shrink cost about 90 ms, and the
+  marching ants alone asked for it eleven times a second, so a selection kept a whole CPU core busy. Stacks of
+  blend-mode or layer-style layers are composed in a single pixel pass (one copy out and back, not one per
+  layer). Page and print-preview thumbnails are made with a parallel area average, about twice as fast as the
+  bicubic filter used before.
+- **Saving a project needs far less memory.** One layer's pixels are copied and encoded at a time, instead of
+  a copy of every layer of every page being taken up front.
+
+## 5.4.1 — 2026-10-21
+
+### Fixed
+
+- **The Save button is visible again in Video settings.** The microphone/level/gain additions in 5.4.0 made the
+  window taller than some screens and pushed Save off the bottom. The settings are now laid out in **two columns**
+  (Recording and Selection lock on the left; While recording and After recording on the right), so the window is
+  much shorter and the Save / Cancel buttons always show.
+- **Unlimited recording now has its own checkbox.** Video settings has an **Unlimited** tickbox next to the length
+  box: tick it to record until you stop (the default), or untick it and type a 1–3600 second cap. This replaces the
+  "leave it blank" rule, which did not reliably switch recording to unlimited.
+
+## 5.4.0 — 2026-10-21
 
 ### Added
 

@@ -138,6 +138,12 @@
     <Compile Include="ImageEditorForm.Guides.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ImageEditorForm.Project.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImageEditorForm.Pages.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ImageEditorForm.Documents.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -151,13 +157,17 @@
     <Compile Include="ImageEditorDialogs.cs" />
     <Compile Include="ImageEditorControls.cs" />
     <Compile Include="ImageEditorAssets.cs" />
+    <Compile Include="ImageEditorProject.cs" />
     <Compile Include="ShortcutSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SystemShortcutsForm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TextPicker.cs" />
-    <Compile Include="ColorPicker.cs" />
+    <Compile Include="FileOpen.cs" />
+    <Compile Include="ColorPicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="NoteForm.cs" />
     <Compile Include="NoteAi.cs" />
     <Compile Include="NoteArchiveForm.cs" />

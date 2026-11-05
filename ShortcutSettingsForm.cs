@@ -26,6 +26,7 @@ namespace MicroApp
 
         readonly List<HotKeyRow> _rows = new List<HotKeyRow>();
         TextBox _dateBox, _longDateBox;
+        ModernCheckBox _askTakeOver;
         Label _datePreview, _longDatePreview;
 
         static readonly string[] ModNames = { "Alt", "Ctrl", "Shift", "Win" };
@@ -86,7 +87,7 @@ namespace MicroApp
             var card = new Card
             {
                 Location = new Point(24, 96),
-                Size = new Size(CardW, 90 + (RowH * 12)),
+                Size = new Size(CardW, 92 + (RowH * 12) + 34),
                 Title = "Hot keys",
                 Description = "Tick the modifiers and give each action a key."
             };
@@ -143,7 +144,7 @@ namespace MicroApp
             AddRow(card, y + RowH * 0, colLabel, colMods, colKey, colEnabled, colReset, "Paste as keystrokes", "HotKey", "HotKeyModifier", "HotKeyEnabled");
             AddRow(card, y + RowH * 1, colLabel, colMods, colKey, colEnabled, colReset, "Grab text (OCR)", "OcrHotKey", "OcrHotKeyModifier", "OcrHotKeyEnabled");
             AddRow(card, y + RowH * 2, colLabel, colMods, colKey, colEnabled, colReset, "Pick Text", "TextPickHotKey", "TextPickHotKeyModifier", "TextPickHotKeyEnabled");
-            AddRow(card, y + RowH * 3, colLabel, colMods, colKey, colEnabled, colReset, "Pick color", "ColorPickHotKey", "ColorPickHotKeyModifier", "ColorPickHotKeyEnabled");
+            AddRow(card, y + RowH * 3, colLabel, colMods, colKey, colEnabled, colReset, "Pick Color", "ColorPickHotKey", "ColorPickHotKeyModifier", "ColorPickHotKeyEnabled");
             AddRow(card, y + RowH * 4, colLabel, colMods, colKey, colEnabled, colReset, "Always on top", "AotHotKey", "AotHotKeyModifier", "AotHotKeyEnabled");
             AddRow(card, y + RowH * 5, colLabel, colMods, colKey, colEnabled, colReset, "Screen capture", "CaptureHotKey", "CaptureHotKeyModifier", "CaptureHotKeyEnabled");
             AddRow(card, y + RowH * 6, colLabel, colMods, colKey, colEnabled, colReset, "Record GIF", "GifHotKey", "GifHotKeyModifier", "GifHotKeyEnabled");
@@ -152,6 +153,16 @@ namespace MicroApp
             AddRow(card, y + RowH * 9, colLabel, colMods, colKey, colEnabled, colReset, "Image editor", "ImageEditorHotKey", "ImageEditorHotKeyModifier", "ImageEditorHotKeyEnabled");
             AddRow(card, y + RowH * 10, colLabel, colMods, colKey, colEnabled, colReset, "Type the date", "DateHotKey", "DateHotKeyModifier", "DateHotKeyEnabled");
             AddRow(card, y + RowH * 11, colLabel, colMods, colKey, colEnabled, colReset, "Type the long date", "LongDateHotKey", "LongDateHotKeyModifier", "LongDateHotKeyEnabled");
+
+            // turned off by "Don't show this again" on the "hot key is taken" question
+            _askTakeOver = new ModernCheckBox
+            {
+                Location = new Point(18, y + RowH * 12 + 6),
+                Size = new Size(card.Width - 36, 26),
+                Text = "Ask before taking a hot key another app already uses",
+                Checked = Properties.Settings.Default.HotKeyTakeOverMode == 0
+            };
+            card.Controls.Add(_askTakeOver);
 
             // ----- date formats card --------------------------------------------------
             var dates = new Card
@@ -353,6 +364,10 @@ namespace MicroApp
                 Properties.Settings.Default[row.ModSetting] = RowMods(row);
                 Properties.Settings.Default[row.EnabledSetting] = row.EnabledToggle.Checked;
             }
+            int mode = Properties.Settings.Default.HotKeyTakeOverMode;
+            if (_askTakeOver.Checked) mode = 0;
+            else if (mode == 0) mode = 1;   // not asking: take them
+            Properties.Settings.Default.HotKeyTakeOverMode = mode;
             Properties.Settings.Default.NoteDateFormat = _dateBox.Text.Trim();
             Properties.Settings.Default.NoteLongDateFormat = _longDateBox.Text.Trim();
             Properties.Settings.Default.Save();

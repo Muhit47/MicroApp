@@ -1285,6 +1285,18 @@ namespace MicroApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("196")]
+        public int EditorPagesPanelWidth {
+            get {
+                return ((int)(this["EditorPagesPanelWidth"]));
+            }
+            set {
+                this["EditorPagesPanelWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int EditorWindowWidth {
             get {
@@ -1460,6 +1472,54 @@ namespace MicroApp.Properties {
             }
             set {
                 this["AotHotKeyTakeOver"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int HotKeyTakeOverMode {
+            get {
+                return ((int)(this["HotKeyTakeOverMode"]));
+            }
+            set {
+                this["HotKeyTakeOverMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C")]
+        public string ColorPickHotKey {
+            get {
+                return ((string)(this["ColorPickHotKey"]));
+            }
+            set {
+                this["ColorPickHotKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int ColorPickHotKeyModifier {
+            get {
+                return ((int)(this["ColorPickHotKeyModifier"]));
+            }
+            set {
+                this["ColorPickHotKeyModifier"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ColorPickHotKeyTakeOver {
+            get {
+                return ((string)(this["ColorPickHotKeyTakeOver"]));
+            }
+            set {
+                this["ColorPickHotKeyTakeOver"] = value;
             }
         }
         

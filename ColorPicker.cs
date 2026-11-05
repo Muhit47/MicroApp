@@ -1,7 +1,9 @@
+using Gma.System.MouseKeyHook;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 namespace MicroApp
@@ -102,248 +104,516 @@ namespace MicroApp
     }
 
     /// <summary>
-    /// Magnifier loupe form that follows the cursor and shows a 9x9 zoomed pixel grid with center reticle.
+    /// Screen colour picker: "+" crosshair everywhere, a magnified loupe of the pixels
+    /// under it with the live #RRGGBB, and one click copies that hex code to the clipboard.
+    /// Right-click or Esc cancels.
     /// </summary>
-    public class ColorLoupeForm : Form
+    static class ColorPicker
     {
-        private readonly Bitmap _screen;
-        private readonly Rectangle _screenBounds;
-        private Color _currentColor = Color.Black;
-        private string _currentHex = "#000000";
-        private Point _cursorPos;
+        static IKeyboardMouseEvents _hook;
+        static ColorPickerHud _hud;
+        static Timer _timer;
+        static Action<string> _picked;
 
-        const int GridCount = 11;      // 11x11 pixel window
-        const int PixelSize = 9;       // 9px per screen pixel
-        const int LoupeSize = GridCount * PixelSize; // 99px
-        const int MarginTotal = 16;
-        const int BadgeHeight = 32;
+        public static bool Active { get { return _hook != null; } }
 
-        public ColorLoupeForm(Bitmap screenSnapshot, Rectangle virtualBounds)
+        /// <summary>Starts picking; <paramref name="picked"/> gets "#RRGGBB" on a click.</summary>
+        public static void Start(Action<string> picked)
         {
-            _screen = screenSnapshot;
-            _screenBounds = virtualBounds;
+            if (_hook != null) return;
+            _picked = picked;
 
+            uint[] cursors = { Native.NORMAL, Native.IBEAM, Native.HAND };
+            for (int i = 0; i < cursors.Length; i++)
+                Native.SetSystemCursor(Native.CopyIcon(Native.LoadCursor(IntPtr.Zero, (int)Native.CROSS)), cursors[i]);
+
+            _hud = new ColorPickerHud();
+            _hud.Sample(Cursor.Position);
+            _hud.Show();
+
+            _hook = Hook.GlobalEvents();
+            _hook.MouseDownExt += Hook_MouseDownExt;
+            _hook.KeyDown += Hook_KeyDown;
+
+            _timer = new Timer { Interval = 30 };
+            _timer.Tick += (s, e) => { if (_hud != null) _hud.Sample(Cursor.Position); };
+            _timer.Start();
+        }
+
+        static void Hook_MouseDownExt(object sender, MouseEventExtArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                e.Handled = true;   // the click belongs to the picker, not the app underneath
+                var p = new Point(e.X, e.Y);
+                _hud.BeginInvoke(new Action(() => Finish(p)));
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                e.Handled = true;
+                _hud.BeginInvoke(new Action(Cancel));
+            }
+        }
+
+        static void Hook_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                e.Handled = true;
+                _hud.BeginInvoke(new Action(Cancel));
+            }
+        }
+
+        static void Finish(Point p)
+        {
+            if (_hook == null) return;
+            Color c = ReadPixel(p);
+            string hex = Hex(c);
+            ColorUtils.AddToHistory(hex);
+            var callback = _picked;
+            End();
+            callback?.Invoke(hex);
+        }
+
+        public static void Cancel()
+        {
+            if (_hook == null) return;
+            End();
+        }
+
+        static void End()
+        {
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer.Dispose();
+                _timer = null;
+            }
+            if (_hook != null)
+            {
+                _hook.MouseDownExt -= Hook_MouseDownExt;
+                _hook.KeyDown -= Hook_KeyDown;
+                _hook.Dispose();
+                _hook = null;
+            }
+            if (_hud != null)
+            {
+                _hud.Close();
+                _hud.Dispose();
+                _hud = null;
+            }
+            _picked = null;
+            Native.SystemParametersInfo(0x0057, 0, null, 0);   // restore the real cursors
+        }
+
+        public static string Hex(Color c)
+        {
+            return string.Format("#{0:X2}{1:X2}{2:X2}", c.R, c.G, c.B);
+        }
+
+        public static Color ReadPixel(Point p)
+        {
+            try
+            {
+                using (var bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb))
+                {
+                    using (var g = Graphics.FromImage(bmp))
+                        g.CopyFromScreen(p.X, p.Y, 0, 0, new Size(1, 1));
+                    return bmp.GetPixel(0, 0);
+                }
+            }
+            catch (Exception)
+            {
+                return Color.Black;
+            }
+        }
+    }
+
+    /// <summary>The loupe that follows the crosshair: zoomed pixels, swatch, hex and RGB.</summary>
+    class ColorPickerHud : Form
+    {
+        const int Cells = 11;          // odd, so there is a centre pixel
+        const int Zoom = 10;           // screen pixels → loupe pixels
+        const int Pad = 8;
+        const int Loupe = Cells * Zoom;
+        const string Hint = "Click to copy.  Esc cancels.";
+
+        readonly Bitmap _grab = new Bitmap(Cells, Cells, PixelFormat.Format32bppArgb);
+        Color _center = Color.Black;
+
+        public ColorPickerHud()
+        {
             FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.Manual;
             TopMost = true;
             BackColor = Theme.Surface;
+            Font = Theme.Base;
             DoubleBuffered = true;
-            Size = new Size(LoupeSize + MarginTotal * 2, LoupeSize + BadgeHeight + MarginTotal * 2);
 
-            try
-            {
-                using (var path = Theme.Round(ClientRectangle, 12))
-                {
-                    Region = new Region(path);
-                }
-            }
-            catch { }
+            int w = Loupe + Pad * 2;
+            int h = Loupe + Pad * 3 + 20 + 16 + 14;   // loupe + swatch row + hint
+            Size = new Size(w, h);
         }
 
-        protected override bool ShowWithoutActivation => true;
+        protected override bool ShowWithoutActivation { get { return true; } }
 
         protected override CreateParams CreateParams
         {
             get
             {
                 var cp = base.CreateParams;
-                // WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_TOPMOST
-                cp.ExStyle |= 0x08000000 | 0x80 | 0x20 | 0x8;
+                const int WS_EX_TOOLWINDOW = 0x00000080;
+                const int WS_EX_TOPMOST = 0x00000008;
+                const int WS_EX_NOACTIVATE = 0x08000000;
+                cp.ExStyle |= WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOACTIVATE;
                 return cp;
             }
         }
 
-        public Color CurrentColor => _currentColor;
-        public string CurrentHex => _currentHex;
-
-        public void UpdateCursor(Point p)
+        /// <summary>Samples the screen around <paramref name="p"/> and positions the HUD nearby.</summary>
+        public void Sample(Point p)
         {
-            _cursorPos = p;
-
-            // Sample current pixel
-            int relX = p.X - _screenBounds.X;
-            int relY = p.Y - _screenBounds.Y;
-
-            if (_screen != null && relX >= 0 && relX < _screen.Width && relY >= 0 && relY < _screen.Height)
+            try
             {
-                _currentColor = _screen.GetPixel(relX, relY);
-                _currentHex = ColorUtils.ToHex(_currentColor);
+                using (var g = Graphics.FromImage(_grab))
+                    g.CopyFromScreen(p.X - Cells / 2, p.Y - Cells / 2, 0, 0, new Size(Cells, Cells));
+                _center = _grab.GetPixel(Cells / 2, Cells / 2);
+            }
+            catch (Exception)
+            {
+                // can fail if the screen is locked, or off a virtual desktop edge: keep the last frame
             }
 
-            // Position loupe offset from cursor, flipping near screen boundaries
-            var currentScreen = Screen.FromPoint(p).Bounds;
-            int x = p.X + 20;
-            int y = p.Y + 20;
-
-            if (x + Width > currentScreen.Right - 4) x = p.X - Width - 20;
-            if (y + Height > currentScreen.Bottom - 4) y = p.Y - Height - 20;
-
+            // park 24 px down-and-right from the cursor, but keep it on screen
+            var screen = Screen.FromPoint(p).WorkingArea;
+            int x = p.X + 24;
+            int y = p.Y + 24;
+            if (x + Width > screen.Right) x = p.X - Width - 16;
+            if (y + Height > screen.Bottom) y = p.Y - Height - 16;
+            if (x < screen.Left) x = screen.Left;
+            if (y < screen.Top) y = screen.Top;
             Location = new Point(x, y);
+
             Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.Half;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor;
 
-            // Background card
-            using (var fill = new SolidBrush(Theme.Dark ? Color.FromArgb(30, 30, 34) : Color.FromArgb(250, 250, 252)))
-                g.FillRectangle(fill, ClientRectangle);
+            // outer border + shadow feel
+            using (var b = new SolidBrush(Theme.Surface)) g.FillRectangle(b, ClientRectangle);
+            using (var p = new Pen(Theme.Border)) g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
 
-            using (var border = new Pen(Theme.Border, 1.4f))
-                g.DrawRectangle(border, 0, 0, Width - 1, Height - 1);
+            // zoomed loupe
+            var loupeRect = new Rectangle(Pad, Pad, Loupe, Loupe);
+            g.DrawImage(_grab, loupeRect, 0, 0, Cells, Cells, GraphicsUnit.Pixel);
 
-            int loupeX = (Width - LoupeSize) / 2;
-            int loupeY = MarginTotal;
-
-            // Magnified pixel grid
-            int relCursorX = _cursorPos.X - _screenBounds.X;
-            int relCursorY = _cursorPos.Y - _screenBounds.Y;
-            int half = GridCount / 2;
-
-            for (int py = 0; py < GridCount; py++)
+            // grid lines over the pixels
+            using (var p = new Pen(Color.FromArgb(40, 128, 128, 128)))
             {
-                for (int px = 0; px < GridCount; px++)
+                for (int i = 0; i <= Cells; i++)
                 {
-                    int srcX = relCursorX - half + px;
-                    int srcY = relCursorY - half + py;
-
-                    Color pxColor = Color.Black;
-                    if (_screen != null && srcX >= 0 && srcX < _screen.Width && srcY >= 0 && srcY < _screen.Height)
-                        pxColor = _screen.GetPixel(srcX, srcY);
-
-                    int destX = loupeX + px * PixelSize;
-                    int destY = loupeY + py * PixelSize;
-
-                    using (var b = new SolidBrush(pxColor))
-                        g.FillRectangle(b, destX, destY, PixelSize, PixelSize);
-
-                    // Light grid separator
-                    using (var gridPen = new Pen(Color.FromArgb(30, 128, 128, 128)))
-                        g.DrawRectangle(gridPen, destX, destY, PixelSize, PixelSize);
+                    int x = Pad + i * Zoom;
+                    int y = Pad + i * Zoom;
+                    g.DrawLine(p, x, Pad, x, Pad + Loupe);
+                    g.DrawLine(p, Pad, y, Pad + Loupe, y);
                 }
             }
 
-            // Grid border
-            using (var gridBorder = new Pen(Theme.Border, 1.5f))
-                g.DrawRectangle(gridBorder, loupeX, loupeY, LoupeSize, LoupeSize);
+            // centre-pixel reticle
+            int cx = Pad + (Cells / 2) * Zoom;
+            int cy = Pad + (Cells / 2) * Zoom;
+            using (var p = new Pen(Color.White, 1.5f)) g.DrawRectangle(p, cx - 1, cy - 1, Zoom + 1, Zoom + 1);
+            using (var p = new Pen(Color.Black, 1f)) g.DrawRectangle(p, cx, cy, Zoom - 1, Zoom - 1);
 
-            // Center target pixel box
-            int centerX = loupeX + half * PixelSize;
-            int centerY = loupeY + half * PixelSize;
-            using (var centerPen = new Pen(Theme.Text, 1.8f))
-                g.DrawRectangle(centerPen, centerX - 1, centerY - 1, PixelSize + 1, PixelSize + 1);
+            // swatch + hex text
+            int rowY = loupeRect.Bottom + Pad;
+            var swatchRect = new Rectangle(Pad, rowY, 22, 22);
+            using (var b = new SolidBrush(_center)) g.FillRectangle(b, swatchRect);
+            using (var p = new Pen(Theme.Border)) g.DrawRectangle(p, swatchRect);
 
-            // Live color badge underneath
-            int badgeY = loupeY + LoupeSize + 8;
-            int chipSize = 16;
-            int chipX = loupeX + 2;
-            int chipY = badgeY + (20 - chipSize) / 2;
+            string hex = ColorPicker.Hex(_center);
+            using (var b = new SolidBrush(Theme.Text))
+            {
+                using (var f = new Font(FontFamily.GenericMonospace, 11f, FontStyle.Bold))
+                    g.DrawString(hex, f, b, swatchRect.Right + 8, rowY + 2);
+            }
 
-            var chipRect = new Rectangle(chipX, chipY, chipSize, chipSize);
-            using (var chipBrush = new SolidBrush(_currentColor))
-                g.FillRectangle(chipBrush, chipRect);
-            using (var chipBorder = new Pen(Theme.Border, 1f))
-                g.DrawRectangle(chipBorder, chipRect);
+            // RGB breakdown
+            int rgbY = rowY + 22 + 4;
+            string rgb = string.Format("R {0}   G {1}   B {2}", _center.R, _center.G, _center.B);
+            using (var b = new SolidBrush(Theme.TextDim))
+            {
+                using (var f = Theme.Tiny)
+                    g.DrawString(rgb, f, b, Pad, rgbY);
+            }
 
-            var hexRect = new Rectangle(chipX + chipSize + 8, badgeY, LoupeSize - chipSize - 8, 20);
-            TextRenderer.DrawText(g, _currentHex, Theme.Strong, hexRect, Theme.Text,
-                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            // hint footer
+            int hintY = rgbY + 14 + 4;
+            using (var b = new SolidBrush(Theme.TextDim))
+            {
+                using (var f = Theme.Tiny)
+                    g.DrawString(Hint, f, b, Pad, hintY);
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                _screen?.Dispose();
-            }
+            if (disposing) _grab.Dispose();
             base.Dispose(disposing);
         }
     }
 
+    /// <summary>Tray → Color Setting: edit the Pick Color hot key.</summary>
+    class ColorPickSettingsForm : PixelPerfectForm
+    {
+        static readonly string[] ModNames = { "Ctrl", "Alt", "Shift", "Win" };
+        static readonly int[] ModBits = { 1, 2, 4, 8 };
+
+        readonly ModernCheckBox[] _mods = new ModernCheckBox[4];
+        readonly TextBox _key;
+
+        public ColorPickSettingsForm()
+        {
+            Text = "Color Setting";
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ShowInTaskbar = false;
+            Font = Theme.Base;
+            BackColor = Theme.Surface;
+            ForeColor = Theme.Text;
+
+            SuspendLayout();
+
+            // header
+            var iconBox = new PictureBox
+            {
+                Location = new Point(24, 20),
+                Size = new Size(32, 32),
+                SizeMode = PictureBoxSizeMode.CenterImage,
+                Image = Properties.Resources.AppIcon.ToBitmap()
+            };
+            Controls.Add(iconBox);
+            Controls.Add(new Label
+            {
+                Location = new Point(68, 16),
+                AutoSize = true,
+                Text = "Color Setting",
+                Font = Theme.Title,
+                ForeColor = Theme.Text,
+                BackColor = Color.Transparent
+            });
+            Controls.Add(new Label
+            {
+                Location = new Point(68, 44),
+                Size = new Size(456, 36),
+                Text = "Press the hot key (or tray \u2192 Pick Color), then click any pixel on screen: " +
+                       "its #RRGGBB code is copied to the clipboard.",
+                Font = Theme.Small,
+                ForeColor = Theme.TextDim,
+                BackColor = Color.Transparent
+            });
+
+            // ----- hot key --------------------------------------------------------------
+            var keyCard = new Card
+            {
+                Location = new Point(24, 96),
+                Size = new Size(500, 110),
+                Title = "Hot key",
+                Description = "Tick the modifiers and give it a key. Clear the key box to turn it off."
+            };
+            Controls.Add(keyCard);
+            int mods = Properties.Settings.Default.ColorPickHotKeyModifier;
+            for (int m = 0; m < 4; m++)
+            {
+                _mods[m] = new ModernCheckBox
+                {
+                    Location = new Point(20 + m * 78, 66),
+                    AutoSize = false,
+                    Size = new Size(74, 24),
+                    Text = ModNames[m],
+                    Checked = (mods & ModBits[m]) != 0
+                };
+                keyCard.Controls.Add(_mods[m]);
+            }
+            keyCard.Controls.Add(new Label { Location = new Point(338, 68), AutoSize = true, Text = "Key", Font = Theme.Base, ForeColor = Theme.TextDim, BackColor = Color.Transparent });
+            // press a key to set it, Delete clears it
+            var keyHost = new FieldHost { Location = new Point(374, 60), Size = new Size(96, 32) };
+            _key = new TextBox
+            {
+                Location = new Point(10, 8),
+                Size = new Size(76, 16),
+                MaxLength = 12,
+                Text = Properties.Settings.Default.ColorPickHotKey,
+                TextAlign = HorizontalAlignment.Center,
+                BackColor = Theme.FieldBg,
+                ForeColor = Theme.Text
+            };
+            _key.KeyDown += Key_KeyDown;
+            keyHost.Controls.Add(_key);
+            keyCard.Controls.Add(keyHost);
+
+            // ----- buttons ------------------------------------------------------------------
+            var save = new ModernButton
+            {
+                Text = "Save",
+                Accent = true,
+                Size = new Size(112, 36),
+                Location = new Point(500 + 24 - 112, keyCard.Bottom + 14)
+            };
+            save.Click += Save_Click;
+            var cancel = new ModernButton
+            {
+                Text = "Cancel",
+                Size = new Size(96, 36),
+                Location = new Point(save.Left - 96 - 8, keyCard.Bottom + 14),
+                DialogResult = DialogResult.Cancel
+            };
+            Controls.Add(save);
+            Controls.Add(cancel);
+            AcceptButton = save;
+            CancelButton = cancel;
+
+            ClientSize = new Size(500 + 48, save.Bottom + 20);
+            ResumeLayout();
+
+            Theme.Apply(this);
+            Native.SetDarkModeForWindow(Handle, ThemeHelper.IsDarkMode);
+            Theme.RoundWindowCorners(Handle);
+            Icon = Properties.Resources.AppIcon;
+        }
+
+        /// <summary>Shows the pressed key in the box, ignoring bare modifiers.</summary>
+        void Key_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Menu: case Keys.LMenu: case Keys.RMenu:
+                case Keys.ShiftKey: case Keys.LShiftKey: case Keys.RShiftKey:
+                case Keys.ControlKey: case Keys.LControlKey: case Keys.RControlKey:
+                case Keys.LWin: case Keys.RWin: case Keys.Return: case Keys.Tab: case Keys.Escape:
+                    return;
+                case Keys.Delete:
+                case Keys.Back:
+                    _key.Text = string.Empty;
+                    break;
+                default:
+                    _key.Text = e.KeyCode.ToString();
+                    break;
+            }
+            e.SuppressKeyPress = true;
+        }
+
+        void Save_Click(object sender, EventArgs e)
+        {
+            string letter = _key.Text.Trim();
+            if (letter.Length == 1) letter = letter.ToUpperInvariant();
+            if (letter.Length > 0)
+            {
+                Keys parsed;
+                if (!Enum.TryParse(letter, true, out parsed))
+                {
+                    ModernDialog.Info("That is not a key", "Use a letter, a digit or a key name such as F8.");
+                    return;
+                }
+            }
+            int mods = 0;
+            for (int m = 0; m < 4; m++) if (_mods[m].Checked) mods |= ModBits[m];
+
+            Properties.Settings.Default.ColorPickHotKey = letter;
+            Properties.Settings.Default.ColorPickHotKeyModifier = mods;
+            Properties.Settings.Default.Save();
+            DialogResult = DialogResult.OK;
+            Close();
+        }
+    }
+
     /// <summary>
-    /// Detailed color inspector dialog showing HEX, RGB, HSL and recent color palette.
+    /// Color inspector dialog displaying swatch, HEX, RGB, HSL values, and recent color history.
     /// </summary>
     public class ColorInspectorDialog : PixelPerfectForm
     {
         private Color _color;
-        private Panel _swatchPanel;
-        private TextBox _hexBox, _rgbBox, _hslBox;
-        private FlowLayoutPanel _historyFlow;
+        private readonly Panel _swatchPanel;
+        private readonly TextBox _hexBox;
+        private readonly TextBox _rgbBox;
+        private readonly TextBox _hslBox;
+        private readonly FlowLayoutPanel _historyFlow;
 
         public ColorInspectorDialog(Color initialColor)
         {
             _color = initialColor;
-            Theme.Init(ThemeHelper.IsDarkMode);
-
-            Text = "MicroApp - Color Details";
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Text = "Color Inspector";
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             ShowInTaskbar = false;
-            StartPosition = FormStartPosition.CenterScreen;
-            BackColor = Theme.Bg;
             Font = Theme.Base;
-            Icon = Properties.Resources.AppIcon;
+            BackColor = Theme.Surface;
+            ForeColor = Theme.Text;
 
             SuspendLayout();
 
             const int CardW = 420;
 
+            // Header
             var iconBox = new PictureBox
             {
                 Location = new Point(24, 20),
-                Size = new Size(36, 36),
-                SizeMode = PictureBoxSizeMode.Zoom,
-                BackColor = Color.Transparent,
-                TabStop = false
+                Size = new Size(32, 32),
+                SizeMode = PictureBoxSizeMode.CenterImage,
+                Image = Properties.Resources.AppIcon.ToBitmap()
             };
-            using (var large = new Icon(Properties.Resources.AppIcon, 36, 36))
-                iconBox.Image = large.ToBitmap();
+            Controls.Add(iconBox);
 
-            var heading = new Label
+            var titleLbl = new Label
             {
-                Location = new Point(72, 18),
+                Location = new Point(68, 16),
                 AutoSize = true,
-                Text = "Color Details",
-                Font = new Font("Segoe UI Semibold", 12F),
+                Text = "Color Inspector",
+                Font = Theme.Title,
                 ForeColor = Theme.Text,
                 BackColor = Color.Transparent
             };
-            var subtitle = new Label
+            Controls.Add(titleLbl);
+
+            var subLbl = new Label
             {
-                Location = new Point(74, 42),
-                Size = new Size(360, 20),
-                Text = "Picked color codes and recent history palette.",
+                Location = new Point(68, 44),
+                AutoSize = true,
+                Text = "Inspect picked color formats and recent history.",
                 Font = Theme.Small,
                 ForeColor = Theme.TextDim,
                 BackColor = Color.Transparent
             };
-            Controls.Add(iconBox);
-            Controls.Add(heading);
-            Controls.Add(subtitle);
+            Controls.Add(subLbl);
 
             var card = new Card
             {
-                Location = new Point(24, 72),
-                Size = new Size(CardW, 366),
-                Title = "Color code",
-                Description = "Click copy to copy formatted code to clipboard."
+                Location = new Point(24, 80),
+                Size = new Size(CardW, 360),
+                Title = "Color Details",
+                Description = "Click copy to copy formatted string to clipboard."
             };
             Controls.Add(card);
 
-            // Large color preview swatch
             _swatchPanel = new Panel
             {
-                Location = new Point(16, 56),
-                Size = new Size(CardW - 32, 54)
+                Location = new Point(16, 60),
+                Size = new Size(CardW - 32, 50),
+                Cursor = Cursors.Hand
             };
             _swatchPanel.Paint += (s, e) =>
             {
                 var g = e.Graphics;
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
                 var r = new Rectangle(0, 0, _swatchPanel.Width - 1, _swatchPanel.Height - 1);
                 using (var path = Theme.Round(r, 8))
                 {
@@ -482,7 +752,7 @@ namespace MicroApp
                 chip.Paint += (s, e) =>
                 {
                     var g = e.Graphics;
-                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
                     var r = new Rectangle(0, 0, chip.Width - 1, chip.Height - 1);
                     using (var path = Theme.Round(r, 6))
                     {

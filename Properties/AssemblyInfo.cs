@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MicroApp")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Compact Windows desktop utility for OCR, screen recording, notes and screenshots.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("RampsBD")]
 [assembly: AssemblyProduct("MicroApp")]
-[assembly: AssemblyCopyright("Copyright © 2026 Collective Software, LLC")]
+[assembly: AssemblyCopyright("Copyright © 2026 RampsBD")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("dda255e3-86ce-4c76-9417-b3778774412a")]
+[assembly: Guid("885be776-66f6-47eb-ba0d-0348a29a0077")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("5.5.0.0")]
-[assembly: AssemblyFileVersion("5.5.0.0")]
+[assembly: AssemblyVersion("5.6.1.0")]
+[assembly: AssemblyFileVersion("5.6.1.0")]
