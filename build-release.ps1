@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "5.5.0"
+    [string]$Version = "5.6.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,7 +51,7 @@ if (-not (Test-Path $modelFile)) {
     Invoke-WebRequest -Uri "https://github.com/Mahi-BD/MicroApp/releases/download/models-1/isnet-general-use.onnx" -OutFile $modelFile
 }
 
-$distDir = "dist-v$Version"
+$distDir = "AI TEMP\dist-v$Version"
 New-Item -ItemType Directory -Force $distDir | Out-Null
 
 # Step 3: NSIS Installers
@@ -66,8 +66,8 @@ try {
     & $makensis "/DPERUSER" "/DVERSION=$Version" "/DSRC=..\..\bin\Release" MicroApp.nsi
     if ($LASTEXITCODE -ne 0) { throw "Per-user installer creation failed." }
 
-    Copy-Item "MicroApp-$Version-setup.exe" "..\..\$distDir\" -Force
-    Copy-Item "MicroApp-$Version-peruser-setup.exe" "..\..\$distDir\" -Force
+    Move-Item "MicroApp-$Version-setup.exe" "..\..\$distDir\" -Force
+    Move-Item "MicroApp-$Version-peruser-setup.exe" "..\..\$distDir\" -Force
 }
 finally {
     Pop-Location
@@ -105,28 +105,28 @@ Remove-Item $staging -Recurse -Force
 
 # Create / Copy RELEASE description
 $relDoc = @"
-# MicroApp $Version - Audio & Video Enhancements, Screen Color Picker, and Shortcuts Hub
+# MicroApp $Version - Multi-Page Projects (.ma), Color Picker, and Shortcuts Hub
 
-Major release combining comprehensive Audio & Video recording upgrades with productivity enhancements and utility tools.
+Major release combining Upstream 5.6.0 & 5.5.0 features with productivity enhancements and shortcuts utilities.
 
 ## Highlights in $Version
 
-### Audio & Video Enhancements
-* **Microphone Selector & Real-Time Level Meter:** Select from any connected microphone device with live audio level feedback.
-* **0-200% Digital Gain Control:** Boost quiet audio inputs or adjust level with precise digital gain scaling.
-* **Two-Column Video Settings:** Compact two-column layout keeps Save and Cancel actions permanently accessible.
-* **Unlimited Video Duration:** Dedicated toggle checkbox for unlimited recording alongside customizable caps (1-3600 seconds).
-* **Multi-Monitor Capture Fix:** Screen capture coordinates properly across disparate monitor setups without grey bars.
+### Image Editor Projects & Multi-Page Documents
+* **MicroApp Project (.ma) Files:** Save entire layered compositions (lossless image layers, editable text and shapes, guides, print resolution) into a single file with safe atomic writes.
+* **Multi-Page Documents:** Create and manage multi-page documents with thumbnail sidebar, page rename/reorder (`Ctrl+PageUp`/`PageDown`), and page-aware batch printing.
+* **Double-Click .ma File Association:** Direct file association in Windows Explorer opens `.ma` projects in running MicroApp instances via inter-process communication.
 
-### Productivity & Utilities
-* **Screen Color Picker:** Inspect pixels with an 11x11 loupe, single-click HEX copy, and detailed color analysis dialog.
-* **Productivity Shortcuts Cheat Sheet Hub:** 145 essential shortcuts categorized for Windows, Word, Excel, and PowerPoint with instant search.
-* **Shortcuts Settings:** Unified hotkey settings with dedicated On/Off toggle switches and reset options.
-* **Typing Settings:** Clearer labeling for paste simulation and delay settings.
+### Color Picker & History
+* **Screen Color Picker (`Ctrl+Alt+C`):** Precision 11x11 pixel magnifier loupe, instant `#RRGGBB` clipboard copy, and comprehensive color format inspector (HEX, RGB, HSL) with a 10-slot history palette.
+
+### Productivity & Audio/Video
+* **Productivity Shortcuts Cheat Sheet Hub:** 145+ categorized shortcuts for Windows, Word, Excel, and PowerPoint with instant search.
+* **Unified Hotkey Management:** Individual On/Off toggles, reset defaults, and flexible "Hot key taken" handling.
+* **Audio & Video Enhancements:** Dedicated microphone selection, live audio meter, 0-200% digital gain, and multi-monitor capture fix.
 
 ## Installing
 
-Three downloads: `MicroApp-$Version-setup.exe` (all users, Program Files), `MicroApp-$Version-peruser-setup.exe` (just you, no admin), or the portable `MicroApp-$Version-win-x64.zip`. Each is about 165 MB because the offline background-removal model is included. Details and silent switches are in [SETUP.md](https://github.com/Mahi-BD/MicroApp/blob/main/SETUP.md). Installing over an older version keeps your settings and notes.
+Three downloads: `MicroApp-$Version-setup.exe` (all users, Program Files), `MicroApp-$Version-peruser-setup.exe` (just you, no admin), or the portable `MicroApp-$Version-win-x64.zip`. Each includes the offline background-removal AI model. Details and silent switches are in [SETUP.md](https://github.com/Muhit47/MicroApp/blob/main/SETUP.md).
 "@
 
 Set-Content -Path "$distDir\RELEASE.md" -Value $relDoc -Encoding UTF8
