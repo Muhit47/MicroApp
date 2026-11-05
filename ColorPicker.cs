@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Gma.System.MouseKeyHook;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -8,101 +8,6 @@ using System.Windows.Forms;
 
 namespace MicroApp
 {
-    /// <summary>
-    /// Helper for colour space conversions and history management.
-    /// </summary>
-    public static class ColorUtils
-    {
-        public static string ToHex(Color c)
-        {
-            return string.Format("#{0:X2}{1:X2}{2:X2}", c.R, c.G, c.B);
-        }
-
-        public static string ToRgb(Color c)
-        {
-            return string.Format("rgb({0}, {1}, {2})", c.R, c.G, c.B);
-        }
-
-        public static string ToHsl(Color c)
-        {
-            float r = c.R / 255f;
-            float g = c.G / 255f;
-            float b = c.B / 255f;
-
-            float max = Math.Max(r, Math.Max(g, b));
-            float min = Math.Min(r, Math.Min(g, b));
-            float delta = max - min;
-
-            float h = 0f;
-            float s = 0f;
-            float l = (max + min) / 2f;
-
-            if (delta > 0.00001f)
-            {
-                s = l > 0.5f ? delta / (2f - max - min) : delta / (max + min);
-
-                if (Math.Abs(max - r) < 0.00001f)
-                {
-                    h = (g - b) / delta + (g < b ? 6f : 0f);
-                }
-                else if (Math.Abs(max - g) < 0.00001f)
-                {
-                    h = (b - r) / delta + 2f;
-                }
-                else
-                {
-                    h = (r - g) / delta + 4f;
-                }
-                h *= 60f;
-            }
-
-            return string.Format("hsl({0}, {1}%, {2}%)", (int)Math.Round(h), (int)Math.Round(s * 100f), (int)Math.Round(l * 100f));
-        }
-
-        public static List<string> GetHistory()
-        {
-            var raw = Properties.Settings.Default.ColorHistory ?? "";
-            var list = new List<string>();
-            foreach (var part in raw.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                var hex = part.Trim();
-                if (hex.Length == 7 && hex.StartsWith("#") && !list.Contains(hex))
-                    list.Add(hex);
-            }
-            return list;
-        }
-
-        public static void AddToHistory(string hex)
-        {
-            if (string.IsNullOrWhiteSpace(hex)) return;
-            hex = hex.Trim().ToUpperInvariant();
-            var list = GetHistory();
-            list.Remove(hex);
-            list.Insert(0, hex);
-            while (list.Count > 10) list.RemoveAt(list.Count - 1);
-            Properties.Settings.Default.ColorHistory = string.Join(";", list);
-            Properties.Settings.Default.Save();
-        }
-
-        public static Color FromHex(string hex)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(hex)) return Color.Black;
-                hex = hex.Trim().TrimStart('#');
-                if (hex.Length == 6)
-                {
-                    int r = Convert.ToInt32(hex.Substring(0, 2), 16);
-                    int g = Convert.ToInt32(hex.Substring(2, 2), 16);
-                    int b = Convert.ToInt32(hex.Substring(4, 2), 16);
-                    return Color.FromArgb(r, g, b);
-                }
-            }
-            catch { }
-            return Color.Black;
-        }
-    }
-
     /// <summary>
     /// Screen colour picker: "+" crosshair everywhere, a magnified loupe of the pixels
     /// under it with the live #RRGGBB, and one click copies that hex code to the clipboard.
@@ -168,10 +73,10 @@ namespace MicroApp
         {
             if (_hook == null) return;
             Color c = ReadPixel(p);
-            string hex = Hex(c);
-            ColorUtils.AddToHistory(hex);
             var callback = _picked;
             End();
+            string hex = Hex(c);
+            ColorUtils.AddToHistory(hex);
             callback?.Invoke(hex);
         }
 
@@ -250,10 +155,9 @@ namespace MicroApp
             BackColor = Theme.Surface;
             Font = Theme.Base;
             DoubleBuffered = true;
-
-            int w = Loupe + Pad * 2;
-            int h = Loupe + Pad * 3 + 20 + 16 + 14;   // loupe + swatch row + hint
-            Size = new Size(w, h);
+            int textH = Theme.Strong.Height + Theme.Small.Height * 2 + 10;
+            int hintW = TextRenderer.MeasureText(Hint, Theme.Small).Width;
+            Size = new Size(Math.Max(Loupe, hintW) + Pad * 2, Pad + Loupe + 6 + textH + Pad);
         }
 
         protected override bool ShowWithoutActivation { get { return true; } }
@@ -263,102 +167,71 @@ namespace MicroApp
             get
             {
                 var cp = base.CreateParams;
-                const int WS_EX_TOOLWINDOW = 0x00000080;
-                const int WS_EX_TOPMOST = 0x00000008;
-                const int WS_EX_NOACTIVATE = 0x08000000;
-                cp.ExStyle |= WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOACTIVATE;
+                cp.ExStyle |= 0x08000000 | 0x80 | 0x20 | 0x8;   // no-activate, toolwindow, hit-transparent, topmost
                 return cp;
             }
         }
 
-        /// <summary>Samples the screen around <paramref name="p"/> and positions the HUD nearby.</summary>
-        public void Sample(Point p)
+        public void Sample(Point cursor)
         {
             try
             {
                 using (var g = Graphics.FromImage(_grab))
-                    g.CopyFromScreen(p.X - Cells / 2, p.Y - Cells / 2, 0, 0, new Size(Cells, Cells));
+                {
+                    g.Clear(Color.Black);
+                    g.CopyFromScreen(cursor.X - Cells / 2, cursor.Y - Cells / 2, 0, 0, new Size(Cells, Cells));
+                }
                 _center = _grab.GetPixel(Cells / 2, Cells / 2);
             }
-            catch (Exception)
-            {
-                // can fail if the screen is locked, or off a virtual desktop edge: keep the last frame
-            }
+            catch (Exception) { }
 
-            // park 24 px down-and-right from the cursor, but keep it on screen
-            var screen = Screen.FromPoint(p).WorkingArea;
-            int x = p.X + 24;
-            int y = p.Y + 24;
-            if (x + Width > screen.Right) x = p.X - Width - 16;
-            if (y + Height > screen.Bottom) y = p.Y - Height - 16;
-            if (x < screen.Left) x = screen.Left;
-            if (y < screen.Top) y = screen.Top;
-            Location = new Point(x, y);
-
+            // sit below-right of the crosshair, flipping when near a screen edge
+            var screen = Screen.FromPoint(cursor).Bounds;
+            int x = cursor.X + 20, y = cursor.Y + 24;
+            if (x + Width > screen.Right - 4) x = cursor.X - Width - 20;
+            if (y + Height > screen.Bottom - 4) y = cursor.Y - Height - 24;
+            if (Location.X != x || Location.Y != y) Location = new Point(x, y);
             Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             var g = e.Graphics;
-            g.PixelOffsetMode = PixelOffsetMode.Half;
+            using (var fill = new SolidBrush(Theme.Surface))
+                g.FillRectangle(fill, ClientRectangle);
+            using (var border = new Pen(Theme.Accent))
+                g.DrawRectangle(border, 0, 0, Width - 1, Height - 1);
+
+            // magnified pixels, crisp
+            var loupe = new Rectangle((Width - Loupe) / 2, Pad, Loupe, Loupe);
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = PixelOffsetMode.Half;
+            g.DrawImage(_grab, loupe);
+            g.PixelOffsetMode = PixelOffsetMode.Default;
 
-            // outer border + shadow feel
-            using (var b = new SolidBrush(Theme.Surface)) g.FillRectangle(b, ClientRectangle);
-            using (var p = new Pen(Theme.Border)) g.DrawRectangle(p, 0, 0, Width - 1, Height - 1);
+            // the centre cell, outlined in a colour that shows up on it
+            var cell = new Rectangle(loupe.X + (Cells / 2) * Zoom, loupe.Y + (Cells / 2) * Zoom, Zoom, Zoom);
+            bool light = (_center.R * 299 + _center.G * 587 + _center.B * 114) / 1000 > 140;
+            using (var pen = new Pen(light ? Color.Black : Color.White))
+                g.DrawRectangle(pen, cell.X - 1, cell.Y - 1, cell.Width + 1, cell.Height + 1);
+            using (var pen = new Pen(Theme.Border))
+                g.DrawRectangle(pen, loupe.X - 1, loupe.Y - 1, loupe.Width + 1, loupe.Height + 1);
 
-            // zoomed loupe
-            var loupeRect = new Rectangle(Pad, Pad, Loupe, Loupe);
-            g.DrawImage(_grab, loupeRect, 0, 0, Cells, Cells, GraphicsUnit.Pixel);
-
-            // grid lines over the pixels
-            using (var p = new Pen(Color.FromArgb(40, 128, 128, 128)))
-            {
-                for (int i = 0; i <= Cells; i++)
-                {
-                    int x = Pad + i * Zoom;
-                    int y = Pad + i * Zoom;
-                    g.DrawLine(p, x, Pad, x, Pad + Loupe);
-                    g.DrawLine(p, Pad, y, Pad + Loupe, y);
-                }
-            }
-
-            // centre-pixel reticle
-            int cx = Pad + (Cells / 2) * Zoom;
-            int cy = Pad + (Cells / 2) * Zoom;
-            using (var p = new Pen(Color.White, 1.5f)) g.DrawRectangle(p, cx - 1, cy - 1, Zoom + 1, Zoom + 1);
-            using (var p = new Pen(Color.Black, 1f)) g.DrawRectangle(p, cx, cy, Zoom - 1, Zoom - 1);
-
-            // swatch + hex text
-            int rowY = loupeRect.Bottom + Pad;
-            var swatchRect = new Rectangle(Pad, rowY, 22, 22);
-            using (var b = new SolidBrush(_center)) g.FillRectangle(b, swatchRect);
-            using (var p = new Pen(Theme.Border)) g.DrawRectangle(p, swatchRect);
-
-            string hex = ColorPicker.Hex(_center);
-            using (var b = new SolidBrush(Theme.Text))
-            {
-                using (var f = new Font(FontFamily.GenericMonospace, 11f, FontStyle.Bold))
-                    g.DrawString(hex, f, b, swatchRect.Right + 8, rowY + 2);
-            }
-
-            // RGB breakdown
-            int rgbY = rowY + 22 + 4;
-            string rgb = string.Format("R {0}   G {1}   B {2}", _center.R, _center.G, _center.B);
-            using (var b = new SolidBrush(Theme.TextDim))
-            {
-                using (var f = Theme.Tiny)
-                    g.DrawString(rgb, f, b, Pad, rgbY);
-            }
-
-            // hint footer
-            int hintY = rgbY + 14 + 4;
-            using (var b = new SolidBrush(Theme.TextDim))
-            {
-                using (var f = Theme.Tiny)
-                    g.DrawString(Hint, f, b, Pad, hintY);
-            }
+            // swatch + hex
+            int y = loupe.Bottom + 6;
+            int sw = Theme.Strong.Height;
+            using (var b = new SolidBrush(_center))
+                g.FillRectangle(b, Pad, y, sw, sw);
+            using (var pen = new Pen(Theme.Border))
+                g.DrawRectangle(pen, Pad, y, sw - 1, sw - 1);
+            TextRenderer.DrawText(g, ColorPicker.Hex(_center), Theme.Strong,
+                new Point(Pad + sw + 6, y), Theme.Text, TextFormatFlags.NoPrefix);
+            y += sw + 2;
+            TextRenderer.DrawText(g, string.Format("RGB {0}, {1}, {2}", _center.R, _center.G, _center.B), Theme.Small,
+                new Point(Pad, y), Theme.TextDim, TextFormatFlags.NoPrefix);
+            y += Theme.Small.Height + 2;
+            TextRenderer.DrawText(g, Hint, Theme.Small, new Rectangle(Pad, y, Width - Pad * 2, Theme.Small.Height + 4),
+                Theme.TextDim, TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
         }
 
         protected override void Dispose(bool disposing)
@@ -367,11 +240,10 @@ namespace MicroApp
             base.Dispose(disposing);
         }
     }
-
-    /// <summary>Tray → Color Setting: edit the Pick Color hot key.</summary>
+    /// <summary>Tray → Color Setting: the colour picker's hot key.</summary>
     class ColorPickSettingsForm : PixelPerfectForm
     {
-        static readonly string[] ModNames = { "Ctrl", "Alt", "Shift", "Win" };
+        static readonly string[] ModNames = { "Alt", "Ctrl", "Shift", "Win" };
         static readonly int[] ModBits = { 1, 2, 4, 8 };
 
         readonly ModernCheckBox[] _mods = new ModernCheckBox[4];
@@ -379,40 +251,43 @@ namespace MicroApp
 
         public ColorPickSettingsForm()
         {
-            Text = "Color Setting";
-            StartPosition = FormStartPosition.CenterScreen;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Theme.Init(ThemeHelper.IsDarkMode);
+
+            Text = "MicroApp - Color Picker";
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
             ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            BackColor = Theme.Bg;
             Font = Theme.Base;
-            BackColor = Theme.Surface;
-            ForeColor = Theme.Text;
 
             SuspendLayout();
 
-            // header
             var iconBox = new PictureBox
             {
-                Location = new Point(24, 20),
-                Size = new Size(32, 32),
-                SizeMode = PictureBoxSizeMode.CenterImage,
-                Image = Properties.Resources.AppIcon.ToBitmap()
+                Location = new Point(28, 24),
+                Size = new Size(40, 40),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                TabStop = false
             };
+            using (var large = new Icon(Properties.Resources.AppIcon, 40, 40))
+                iconBox.Image = large.ToBitmap();
             Controls.Add(iconBox);
             Controls.Add(new Label
             {
-                Location = new Point(68, 16),
+                Location = new Point(84, 24),
                 AutoSize = true,
-                Text = "Color Setting",
-                Font = Theme.Title,
+                Text = "Color Picker",
+                Font = new Font("Segoe UI Semibold", 12.5F),
                 ForeColor = Theme.Text,
                 BackColor = Color.Transparent
             });
             Controls.Add(new Label
             {
-                Location = new Point(68, 44),
-                Size = new Size(456, 36),
+                Location = new Point(86, 52),
+                Size = new Size(430, 32),
                 Text = "Press the hot key (or tray \u2192 Pick Color), then click any pixel on screen: " +
                        "its #RRGGBB code is copied to the clipboard.",
                 Font = Theme.Small,
@@ -535,6 +410,101 @@ namespace MicroApp
     }
 
     /// <summary>
+    /// Helper for colour space conversions and history management.
+    /// </summary>
+    public static class ColorUtils
+    {
+        public static string ToHex(Color c)
+        {
+            return string.Format("#{0:X2}{1:X2}{2:X2}", c.R, c.G, c.B);
+        }
+
+        public static string ToRgb(Color c)
+        {
+            return string.Format("rgb({0}, {1}, {2})", c.R, c.G, c.B);
+        }
+
+        public static string ToHsl(Color c)
+        {
+            float r = c.R / 255f;
+            float g = c.G / 255f;
+            float b = c.B / 255f;
+
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            float delta = max - min;
+
+            float h = 0f;
+            float s = 0f;
+            float l = (max + min) / 2f;
+
+            if (delta > 0.00001f)
+            {
+                s = l > 0.5f ? delta / (2f - max - min) : delta / (max + min);
+
+                if (Math.Abs(max - r) < 0.00001f)
+                {
+                    h = (g - b) / delta + (g < b ? 6f : 0f);
+                }
+                else if (Math.Abs(max - g) < 0.00001f)
+                {
+                    h = (b - r) / delta + 2f;
+                }
+                else
+                {
+                    h = (r - g) / delta + 4f;
+                }
+                h *= 60f;
+            }
+
+            return string.Format("hsl({0}, {1}%, {2}%)", (int)Math.Round(h), (int)Math.Round(s * 100f), (int)Math.Round(l * 100f));
+        }
+
+        public static List<string> GetHistory()
+        {
+            var raw = Properties.Settings.Default.ColorHistory ?? "";
+            var list = new List<string>();
+            foreach (var part in raw.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var hex = part.Trim();
+                if (hex.Length == 7 && hex.StartsWith("#") && !list.Contains(hex))
+                    list.Add(hex);
+            }
+            return list;
+        }
+
+        public static void AddToHistory(string hex)
+        {
+            if (string.IsNullOrWhiteSpace(hex)) return;
+            hex = hex.Trim().ToUpperInvariant();
+            var list = GetHistory();
+            list.Remove(hex);
+            list.Insert(0, hex);
+            while (list.Count > 10) list.RemoveAt(list.Count - 1);
+            Properties.Settings.Default.ColorHistory = string.Join(";", list);
+            Properties.Settings.Default.Save();
+        }
+
+        public static Color FromHex(string hex)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(hex)) return Color.Black;
+                hex = hex.Trim().TrimStart('#');
+                if (hex.Length == 6)
+                {
+                    int r = Convert.ToInt32(hex.Substring(0, 2), 16);
+                    int g = Convert.ToInt32(hex.Substring(2, 2), 16);
+                    int b = Convert.ToInt32(hex.Substring(4, 2), 16);
+                    return Color.FromArgb(r, g, b);
+                }
+            }
+            catch { }
+            return Color.Black;
+        }
+    }
+
+    /// <summary>
     /// Color inspector dialog displaying swatch, HEX, RGB, HSL values, and recent color history.
     /// </summary>
     public class ColorInspectorDialog : PixelPerfectForm
@@ -578,7 +548,7 @@ namespace MicroApp
                 Location = new Point(68, 16),
                 AutoSize = true,
                 Text = "Color Inspector",
-                Font = Theme.Title,
+                Font = Theme.Heading,
                 ForeColor = Theme.Text,
                 BackColor = Color.Transparent
             };

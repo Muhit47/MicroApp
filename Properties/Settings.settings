@@ -221,15 +221,6 @@
     <Setting Name="TextPickHotKeyTakeOver" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="ColorPickHotKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C</Value>
-    </Setting>
-    <Setting Name="ColorPickHotKeyModifier" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">3</Value>
-    </Setting>
-    <Setting Name="ColorPickHotKeyTakeOver" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="ColorHistory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
