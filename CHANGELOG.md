@@ -1,5 +1,51 @@
 # Changelog
 
+## 5.8.1 — 2026-11-09
+
+### Added
+
+- **Full Integration of Upstream v5.8.0 & v5.7.0:** Open Photoshop (.psd/.psb), Adobe Illustrator (.ai), SVG vector (.svg/.svgz), and EPS (.eps/.epsf/.epsi) files in the Image Editor.
+- **Productivity & Utilities Preserved:** Retained the searchable Shortcuts Cheat Sheet Hub, individual Hotkey On/Off toggles, and the multi-format Color Picker with 10-slot palette history.
+
+## 5.8.0 — 2026-11-07
+
+### Added
+
+- **Open SVG drawings (.svg, .svgz)** in the image editor (File → Open, drag and drop, *Open with*), drawn by
+  Svg.NET at 300 ppi on a transparent background - small icons at least 1024 px, very large drawings up to
+  36 megapixels. Shapes and text become pixels. Some SVG filter effects (blurs, lighting) are not drawn, or
+  drawn differently from a browser. Nothing outside the file is fetched: no web addresses and no external XML
+  entities (entities declared inside the file still work), and entity expansion is capped.
+- **Open EPS files (.eps, .epsf, .epsi).** When **Ghostscript** is installed (free, ghostscript.com - it cannot be
+  bundled with MicroApp) it draws the file at 300 ppi on a transparent background, always with `-dSAFER`.
+  Without it, the preview picture many EPS files carry inside (TIFF or WMF in a DOS EPS header, or an EPSI
+  bitmap) is opened, and MicroApp says it is only a preview; with neither, the message says how to get
+  Ghostscript. A portable Ghostscript can be used by pointing the `MICROAPP_GHOSTSCRIPT` environment variable
+  at its `gswin64c.exe`.
+- **Older PostScript-only Illustrator files (.ai)** are drawn by Ghostscript too, when it is installed and can draw
+  them (files that need Illustrator's own PostScript routines still get the re-save message).
+
+## 5.7.0 — 2026-11-07
+
+### Added
+
+- **Open Photoshop files (.psd, .psb) in the image editor** — File → Open, drag and drop, or *Open with*
+  MicroApp. Every pixel layer comes in as a layer of its own with its name, position, opacity, blend mode and
+  visibility. Layer masks, vector masks and clipping masks are applied (mask density included); groups pass their
+  visibility, opacity and masks down to the layers inside; Solid Color fill and shape layers saved without
+  pixels are drawn from their colour and path. RGB, grayscale, indexed, CMYK, Lab, duotone and bitmap documents,
+  1/8/16/32 bits per channel. Text layers and smart objects arrive as pixels. Not reproduced (MicroApp says
+  which after opening): adjustment layers, layer styles (shadows, strokes, glows), gradient/pattern fills saved
+  without pixels, and blend modes the editor lacks (Dissolve, Lighter/Darker Color, Vivid/Linear/Pin Light,
+  Hard Mix, Subtract, Divide). CMYK and grayscale colours are converted without the document's colour profile.
+- **Open Illustrator files (.ai)** — the artwork is drawn by the PDF renderer built into Windows from the PDF
+  copy Illustrator saves inside every .ai ("Create PDF Compatible File", on by default). Each artboard becomes a
+  page, at 300 ppi (large artboards lower, up to 36 megapixels a page), on a transparent background. Shapes and
+  text become pixels. Older PostScript-only .ai files and SVG files renamed to .ai get a message saying how to
+  re-save them.
+- **File → Add Image** also takes .psd/.psb/.ai: the first page, flattened into one layer.
+- Opening is read-only: save the result as a MicroApp project (.ma) or a picture.
+
 ## 5.6.1 — 2026-11-05
 
 ### Added
