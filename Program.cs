@@ -359,7 +359,6 @@ namespace MicroApp
             var grab = new ToolStripMenuItem("Grab text (OCR)", null, GrabText) { Padding = new Padding(4, 3, 4, 3) };
             var pick = new ToolStripMenuItem("Pick Text", null, PickText) { Padding = new Padding(4, 3, 4, 3) };
             var color = new ToolStripMenuItem("Pick Color", null, PickColor) { Padding = new Padding(4, 3, 4, 3) };
-            color.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier);
             var aot = new ToolStripMenuItem("Always on Top", null, AlwaysOnTopPick) { Padding = new Padding(4, 3, 4, 3) };
             var capture = new ToolStripMenuItem("Screen Capture", null, ScreenCapture) { Padding = new Padding(4, 3, 4, 3) };
             var gif = new ToolStripMenuItem("Record GIF", null, RecordGif) { Padding = new Padding(4, 3, 4, 3) };
@@ -368,14 +367,15 @@ namespace MicroApp
             var editor = new ToolStripMenuItem("Image Editor", null, ImageEditor) { Padding = new Padding(4, 3, 4, 3) };
 
             // each feature shows its current hot key, so the menu doubles as a cheat sheet
-            grab.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.OcrHotKey, Properties.Settings.Default.OcrHotKeyModifier);
-            pick.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.TextPickHotKey, Properties.Settings.Default.TextPickHotKeyModifier);
-            aot.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.AotHotKey, Properties.Settings.Default.AotHotKeyModifier);
-            capture.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.CaptureHotKey, Properties.Settings.Default.CaptureHotKeyModifier);
-            gif.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.GifHotKey, Properties.Settings.Default.GifHotKeyModifier);
-            video.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.VideoHotKey, Properties.Settings.Default.VideoHotKeyModifier);
-            note.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.NoteHotKey, Properties.Settings.Default.NoteHotKeyModifier);
-            editor.ShortcutKeyDisplayString = HotKeyDisplay(Properties.Settings.Default.ImageEditorHotKey, Properties.Settings.Default.ImageEditorHotKeyModifier);
+            grab.ShortcutKeyDisplayString = Properties.Settings.Default.OcrHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.OcrHotKey, Properties.Settings.Default.OcrHotKeyModifier) : null;
+            pick.ShortcutKeyDisplayString = Properties.Settings.Default.TextPickHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.TextPickHotKey, Properties.Settings.Default.TextPickHotKeyModifier) : null;
+            color.ShortcutKeyDisplayString = Properties.Settings.Default.ColorPickHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.ColorPickHotKey, Properties.Settings.Default.ColorPickHotKeyModifier) : null;
+            aot.ShortcutKeyDisplayString = Properties.Settings.Default.AotHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.AotHotKey, Properties.Settings.Default.AotHotKeyModifier) : null;
+            capture.ShortcutKeyDisplayString = Properties.Settings.Default.CaptureHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.CaptureHotKey, Properties.Settings.Default.CaptureHotKeyModifier) : null;
+            gif.ShortcutKeyDisplayString = Properties.Settings.Default.GifHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.GifHotKey, Properties.Settings.Default.GifHotKeyModifier) : null;
+            video.ShortcutKeyDisplayString = Properties.Settings.Default.VideoHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.VideoHotKey, Properties.Settings.Default.VideoHotKeyModifier) : null;
+            note.ShortcutKeyDisplayString = Properties.Settings.Default.NoteHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.NoteHotKey, Properties.Settings.Default.NoteHotKeyModifier) : null;
+            editor.ShortcutKeyDisplayString = Properties.Settings.Default.ImageEditorHotKeyEnabled ? HotKeyDisplay(Properties.Settings.Default.ImageEditorHotKey, Properties.Settings.Default.ImageEditorHotKeyModifier) : null;
             var shortcuts = new ToolStripMenuItem("Shortcuts Settings", null, Shortcuts) { Padding = new Padding(4, 3, 4, 3) };
             var systemShortcuts = new ToolStripMenuItem("Shortcuts Cheat Sheet", null, SystemShortcuts) { Padding = new Padding(4, 3, 4, 3) };
             var keySettings = new ToolStripMenuItem("Typing Setting", null, Settings) { Padding = new Padding(4, 3, 4, 3) };
@@ -2041,6 +2041,7 @@ namespace MicroApp
         void StartColorPickHotKey()
         {
             StopColorPickHotKey();
+            if (!Properties.Settings.Default.ColorPickHotKeyEnabled) return;
             var letter = Properties.Settings.Default.ColorPickHotKey;
             if (string.IsNullOrEmpty(letter)) return;
             try
