@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "5.6.1"
+    [string]$Version = "5.8.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -34,6 +34,7 @@ if (-not (Test-Path $makensis)) {
 
 # Step 1: Release Build
 Write-Host "`n[1/4] Compiling Release Build..." -ForegroundColor Yellow
+Stop-Process -Name MicroApp -Force -ErrorAction SilentlyContinue
 & $msbuild MicroApp.csproj /p:Configuration=Release /p:SkipCodeSigning=true /v:m
 if ($LASTEXITCODE -ne 0) { throw "MSBuild compilation failed." }
 
@@ -85,6 +86,7 @@ $releaseFiles = @(
     "Gma.System.MouseKeyHook.dll", "System.Buffers.dll", "System.Memory.dll",
     "System.Numerics.Vectors.dll", "System.Runtime.CompilerServices.Unsafe.dll",
     "Microsoft.ML.OnnxRuntime.dll", "onnxruntime.dll", "onnxruntime_providers_shared.dll",
+    "Svg.dll", "ExCSS.dll",
     "msvcp140.dll", "msvcp140_1.dll", "vcruntime140.dll", "vcruntime140_1.dll"
 )
 
@@ -105,24 +107,23 @@ Remove-Item $staging -Recurse -Force
 
 # Create / Copy RELEASE description
 $relDoc = @"
-# MicroApp $Version - Multi-Page Projects (.ma), Color Picker, and Shortcuts Hub
+# MicroApp $Version - Open Photoshop, Illustrator, SVG & EPS, plus Shortcuts Hub
 
-Major release combining Upstream 5.6.0 & 5.5.0 features with productivity enhancements and shortcuts utilities.
+Major release combining Upstream 5.8.0 & 5.7.0 advanced document import capabilities with local productivity shortcuts and color tools.
 
 ## Highlights in $Version
 
-### Image Editor Projects & Multi-Page Documents
-* **MicroApp Project (.ma) Files:** Save entire layered compositions (lossless image layers, editable text and shapes, guides, print resolution) into a single file with safe atomic writes.
-* **Multi-Page Documents:** Create and manage multi-page documents with thumbnail sidebar, page rename/reorder (`Ctrl+PageUp`/`PageDown`), and page-aware batch printing.
-* **Double-Click .ma File Association:** Direct file association in Windows Explorer opens `.ma` projects in running MicroApp instances via inter-process communication.
+### Open Photoshop, Illustrator, SVG and EPS Files
+* **Photoshop (.psd/.psb):** Opens pixel layers individually with names, opacity, positions, blend modes, and clipping masks applied. Supports 1/8/16/32-bit and RGB, CMYK, Lab, Grayscale color models.
+* **Adobe Illustrator (.ai):** Direct PDF-compatible artboard rendering at 300 ppi on transparent backgrounds.
+* **Vector SVG (.svg/.svgz):** High-resolution vector drawing powered by Svg.NET at 300 ppi.
+* **EPS (.eps/.epsf/.epsi):** High-resolution PostScript rendering via Ghostscript integration or embedded preview extraction.
 
-### Color Picker & History
-* **Screen Color Picker (`Ctrl+Alt+C`):** Precision 11x11 pixel magnifier loupe, instant `#RRGGBB` clipboard copy, and comprehensive color format inspector (HEX, RGB, HSL) with a 10-slot history palette.
-
-### Productivity & Audio/Video
-* **Productivity Shortcuts Cheat Sheet Hub:** 145+ categorized shortcuts for Windows, Word, Excel, and PowerPoint with instant search.
-* **Unified Hotkey Management:** Individual On/Off toggles, reset defaults, and flexible "Hot key taken" handling.
-* **Audio & Video Enhancements:** Dedicated microphone selection, live audio meter, 0-200% digital gain, and multi-monitor capture fix.
+### Productivity Tools & Color Utilities
+* **Productivity Shortcuts Cheat Sheet Hub:** 145+ essential shortcuts categorized for Windows, Word, Excel, and PowerPoint with real-time search.
+* **Granular Hotkey Controls:** Dedicated On/Off switches and reset options for every shortcut action.
+* **Screen Color Picker (`Ctrl+Alt+C`):** Precision 11x11 loupe with instant `#RRGGBB` clipboard copy and multi-format (HEX/RGB/HSL) inspector with a 10-slot palette history.
+* **MicroApp Projects (.ma):** Multi-page document editing with page thumbnails, batch printing, and double-click file associations.
 
 ## Installing
 
